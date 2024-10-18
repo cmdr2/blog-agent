@@ -3,7 +3,6 @@ import subprocess
 import json
 import re
 import time
-import zipfile
 
 FUNCTION_FILE = "blog_agent.py"
 BLOG_INFO_DOTFILE = ".blog_info.json"
@@ -13,17 +12,15 @@ def zip_lambda_files():
     # Set the zip file name to "function.zip"
     zip_file_name = "function.zip"
 
-    # Create a zip file
-    with zipfile.ZipFile(zip_file_name, "w") as zip_file:
-        # Add blog_agent.py to the zip
-        zip_file.write("blog_agent.py", arcname="blog_agent.py")
+    # Delete the existing zip file if it exists
+    if os.path.exists(zip_file_name):
+        os.remove(zip_file_name)
 
-        # Add the contents of the file_processors folder to the zip, preserving directory structure
-        for root, dirs, files in os.walk("file_processors"):
-            for file in files:
-                file_path = os.path.join(root, file)
-                # Use os.path.relpath to keep the directory structure
-                zip_file.write(file_path, arcname=os.path.relpath(file_path, start=os.path.dirname("file_processors")))
+    # Create a command to zip the files, ignoring __pycache__ directories
+    command = ["zip", "-r", zip_file_name, "blog_agent.py", "file_processors", "-x", "*__pycache__*"]
+
+    # Execute the command
+    subprocess.run(command, check=True)
 
     return zip_file_name
 

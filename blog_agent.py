@@ -6,6 +6,7 @@ import io
 import boto3
 import importlib
 from concurrent.futures import ThreadPoolExecutor
+from mimetypes import guess_type
 
 from hashlib import sha256
 import hmac
@@ -77,7 +78,9 @@ def lambda_handler(event, context):
         for file_info in zip_ref.infolist():
             with zip_ref.open(file_info.filename) as file:
                 # Step 3: Process the file using process_file
-                file_dict.update(file_processor.process_file(file_info.filename, file.read().decode()))
+                files = file_processor.process_file(file_info.filename, file.read().decode())
+                if files:
+                    file_dict.update(files)
 
     # Step 4: Batch upload files to S3
     batch_upload_to_s3(file_dict)
@@ -106,24 +109,30 @@ def batch_upload_to_s3(file_dict):
     Uploads all files to S3 in a batch operation using threading for concurrent uploads.
     - file_dict: A dictionary where keys are S3 file paths and values are file contents.
     """
-    with ThreadPoolExecutor() as executor:
-        futures = {executor.submit(upload_file, path, content): path for path, content in file_dict.items()}
+    # with ThreadPoolExecutor() as executor:
+    #     futures = [executor.submit(upload_file, path, content) for path, content in file_dict.items()]
 
-        # Wait for all futures to complete
-        for future in futures:
-            future.result()  # Raise any exceptions that occurred during the upload
-            print("future done", future)
+    #     # Wait for all futures to complete
+    #     for future in futures:
+    #         future.result()  # Raise any exceptions that occurred during the upload
+    #         print("future done", future)
+
+    for path, content in file_dict.items():
+        upload_file(path, content)
 
 
 def upload_file(file_path, file_content):
     """
     Upload a single file to S3.
     """
+    mime_type = guess_type(file_path)[0]
+
+    print("uploading", S3_PREFIX + "/" + file_path, mime_type)
     s3_client.put_object(
         Bucket=S3_BUCKET,
         Key=S3_PREFIX + "/" + file_path,
         Body=file_content.encode(),
-        ContentType="text/plain",  # Set the MIME type to plaintext
+        ContentType=mime_type,
         ACL="public-read",
     )
     print("uploaded", file_path)
