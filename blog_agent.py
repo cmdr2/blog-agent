@@ -39,8 +39,6 @@ s3_client = boto3.client("s3")
 
 
 def lambda_handler(event, context):
-    print(event)
-    print(context)
     httpMethod = event["requestContext"]["http"]["method"]
     queryParams = event.get("queryStringParameters", {})
     # Check for Dropbox challenge verification request
@@ -90,4 +88,4 @@ def download_journal_zip():
 
 
 def upload_to_s3(key, content):
-    s3_client.put_object(Bucket=S3_BUCKET, Key=key, Body=content, ACL="public-read")
+    s3_client.put_object(Bucket=S3_BUCKET, Key=key, Body=content, ContentType="text/plain", ACL="public-read")

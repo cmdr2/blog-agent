@@ -6,8 +6,8 @@ Publish a blog to S3 automatically using text files in Dropbox.
 ## Configure
 ### Step 1: Create a Dropbox access token
 1. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/).
-2. Create a new app. Choose `Scoped access`, then `App folder` and then give it any name, like `blog-agent`.
-3. Set the folder name to whatever you want. **Note:** This will always be *inside* the `/Apps` folder in Dropbox!
+2. Create a new app. Choose `Scoped access`, then `App folder` and then give it the name `blog-agent`.
+3. Set the folder name to whatever you want. **Note:** This will always be *inside* the `/Apps/blog-agent` folder in Dropbox! E.g. "posts"
 4. Click `Generate Access Token` and copy the generated token. Keep this safely, we'll need it later.
 5. Also copy the `App Secret` and keep it safely for later.
 6. Open the `Permissions` tab, and enable `files.content.read` and press `Save`.
@@ -20,7 +20,7 @@ You have two options for this step: an [automated script](create_lambda.py) or a
 The [automated script](create_lambda.py) will create the Lambda function, IAM Roles, Permission Policies and link them together.
 
 1. Ensure that you have the [AWS CLI](https://aws.amazon.com/cli/) installed and configured correctly.
-2. Run `python create_lambda.py`. Enter the desired Lambda function name, e.g. 'blog-agent', the S3 bucket name, the S3 folder path, and the Dropbox folder name inside `/Apps/app-folder`
+2. Run `python create_lambda.py`. Enter the desired Lambda function name, e.g. 'blog-agent', the S3 bucket name, the S3 folder path, and the Dropbox folder name inside `/Apps/blog-agent`
 3. **Important:** Note down the function URL printed at the end.
 4. Finally, open the lambda function in the AWS Console, open `Configuration` > `Environment Variables`, and set the `DROPBOX_TOKEN` and `DROPBOX_APP_SECRET` environment variables.
 
@@ -39,3 +39,9 @@ Then set the following environment variables on the Lambda function in the AWS C
 ### Step 3: Configure the Dropbox webhook
 1. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/), and open your app inside that.
 2. Under the `Settings` tab, scroll down to the `Webhooks` entry, and set the newly created function's URL and press `Save`.
+
+
+### Step 4: You're done!
+You can now create a folder inside the `/Apps/blog-agent` Dropbox folder, and name it whatever you configured previously, e.g. "posts".
+
+After that, any text files that you create inside that folder will be published to S3 automatically. E.g. `/Apps/blog-agent/posts/October 2024.txt` will automatically get published to `https://your_s3_bucket_url/your_path_prefix/posts/October 2024.txt`.
