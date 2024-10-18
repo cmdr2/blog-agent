@@ -3,8 +3,29 @@ import subprocess
 import json
 import re
 import time
+import zipfile
 
 FUNCTION_FILE = "blog_agent.py"
+BLOG_INFO_DOTFILE = ".blog_info.json"
+
+
+def zip_lambda_files():
+    # Set the zip file name to "function.zip"
+    zip_file_name = "function.zip"
+
+    # Create a zip file
+    with zipfile.ZipFile(zip_file_name, "w") as zip_file:
+        # Add blog_agent.py to the zip
+        zip_file.write("blog_agent.py", arcname="blog_agent.py")
+
+        # Add the contents of the file_processors folder to the zip, preserving directory structure
+        for root, dirs, files in os.walk("file_processors"):
+            for file in files:
+                file_path = os.path.join(root, file)
+                # Use os.path.relpath to keep the directory structure
+                zip_file.write(file_path, arcname=os.path.relpath(file_path, start=os.path.dirname("file_processors")))
+
+    return zip_file_name
 
 
 def create_lambda_function(lambda_name, s3_bucket, s3_prefix, dropbox_folder_path):
@@ -94,6 +115,8 @@ def create_lambda_function(lambda_name, s3_bucket, s3_prefix, dropbox_folder_pat
     print(f"Creating the Lambda function from {FUNCTION_FILE}..")
     function_name = os.path.splitext(FUNCTION_FILE)[0]
 
+    zip_file_name = zip_lambda_files()
+
     create_lambda_command = [
         "aws",
         "lambda",
@@ -107,13 +130,10 @@ def create_lambda_function(lambda_name, s3_bucket, s3_prefix, dropbox_folder_pat
         "--handler",
         f"{function_name}.lambda_handler",
         "--zip-file",
-        "fileb://function.zip",
+        f"fileb://{zip_file_name}",
         "--environment",
         json.dumps(environment_vars),
     ]
-
-    # Zip the function file
-    subprocess.run(["zip", "function.zip", FUNCTION_FILE], check=True)
 
     subprocess.run(create_lambda_command, check=True)
 
@@ -161,7 +181,20 @@ def create_lambda_function(lambda_name, s3_bucket, s3_prefix, dropbox_folder_pat
     print(f"Lambda function URL: {url}")
     print("")
 
+    # Save the blog info
+    blog_info = {
+        "lambda_function_name": lambda_name,
+        "lambda_function_url": url,
+    }
+
+    save_blog_info(blog_info)
+
     return url
+
+
+def save_blog_info(blog_info):
+    with open(BLOG_INFO_DOTFILE, "w") as f:
+        json.dump(blog_info, f)
 
 
 def get_account_id():
