@@ -1,7 +1,7 @@
 # blog-agent
 Publish a blog to S3 automatically using text files in Dropbox.
 
-**Tip:** If you frequently save while writing text files (like me), consider pausing Dropbox sync while you write and resuming after you've finished editing. This will avoid frequent republishes and Lambda calls.
+**Tip:** If you save very frequently while writing text files (like I do), consider pausing Dropbox sync while you write and resuming after you've finished editing. This will avoid frequent republishes and Lambda calls.
 
 ## Configure
 ### Step 1: Create a Dropbox access token
