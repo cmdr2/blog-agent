@@ -4,16 +4,26 @@ import http.client
 import zipfile
 import io
 import boto3
+import importlib
 from concurrent.futures import ThreadPoolExecutor
 
 from hashlib import sha256
 import hmac
+
+VALID_FILE_PROCESSORS = ("flat_blog", "passthrough")
 
 S3_BUCKET = os.environ.get("S3_BUCKET", "your-s3-bucket-name")
 DROPBOX_TOKEN = os.environ.get("DROPBOX_TOKEN", "your-dropbox-access-token")
 DROPBOX_APP_SECRET = os.environ.get("DROPBOX_APP_SECRET", "your-dropbox-app-secret")
 DROPBOX_FOLDER_PATH = os.environ.get("DROPBOX_FOLDER_PATH", "/your-journal-folder-in-dropbox/")
 S3_PREFIX = os.environ.get("S3_PREFIX", "public/path/in/s3/")
+
+FILE_PROCESSOR = os.environ.get("FILE_PROCESSOR", "passthrough")
+
+if FILE_PROCESSOR not in VALID_FILE_PROCESSORS:
+    raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
+
+file_processor = importlib.import_module("file_processors." + FILE_PROCESSOR)
 
 
 def ensure_slashes(path, start=True, end=True):
@@ -67,16 +77,12 @@ def lambda_handler(event, context):
         for file_info in zip_ref.infolist():
             with zip_ref.open(file_info.filename) as file:
                 # Step 3: Process the file using process_file
-                file_dict.update(process_file(file_info.filename, file.read().decode()))
+                file_dict.update(file_processor.process_file(file_info.filename, file.read().decode()))
 
     # Step 4: Batch upload files to S3
     batch_upload_to_s3(file_dict)
 
     return {"statusCode": 200, "body": "Publish successful!"}
-
-
-def process_file(filename, content: str):
-    return {S3_PREFIX + "/" + filename: content.encode()}
 
 
 def download_journal_zip():
@@ -115,8 +121,8 @@ def upload_file(file_path, file_content):
     """
     s3_client.put_object(
         Bucket=S3_BUCKET,
-        Key=file_path,
-        Body=file_content,
+        Key=S3_PREFIX + "/" + file_path,
+        Body=file_content.encode(),
         ContentType="text/plain",  # Set the MIME type to plaintext
         ACL="public-read",
     )
