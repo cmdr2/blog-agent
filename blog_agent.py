@@ -4,6 +4,7 @@ import http.client
 import zipfile
 import io
 import boto3
+from concurrent.futures import ThreadPoolExecutor
 
 from hashlib import sha256
 import hmac
@@ -61,14 +62,21 @@ def lambda_handler(event, context):
     zip_data = download_journal_zip()
 
     # Step 2: Extract and copy files to S3
+    file_dict = {}  # Dictionary to store file paths and contents for batch upload
     with zipfile.ZipFile(io.BytesIO(zip_data), "r") as zip_ref:
         for file_info in zip_ref.infolist():
             with zip_ref.open(file_info.filename) as file:
-                # Step 3: Upload files to S3
-                s3_key = S3_PREFIX + "/" + file_info.filename
-                upload_to_s3(s3_key, file.read())
+                # Step 3: Process the file using process_file
+                file_dict.update(process_file(file_info.filename, file.read().decode()))
+
+    # Step 4: Batch upload files to S3
+    batch_upload_to_s3(file_dict)
 
     return {"statusCode": 200, "body": "Publish successful!"}
+
+
+def process_file(filename, content: str):
+    return {S3_PREFIX + "/" + filename: content.encode()}
 
 
 def download_journal_zip():
@@ -87,5 +95,29 @@ def download_journal_zip():
     return response.read()
 
 
-def upload_to_s3(key, content):
-    s3_client.put_object(Bucket=S3_BUCKET, Key=key, Body=content, ContentType="text/plain", ACL="public-read")
+def batch_upload_to_s3(file_dict):
+    """
+    Uploads all files to S3 in a batch operation using threading for concurrent uploads.
+    - file_dict: A dictionary where keys are S3 file paths and values are file contents.
+    """
+    with ThreadPoolExecutor() as executor:
+        futures = {executor.submit(upload_file, path, content): path for path, content in file_dict.items()}
+
+        # Wait for all futures to complete
+        for future in futures:
+            future.result()  # Raise any exceptions that occurred during the upload
+            print("future done", future)
+
+
+def upload_file(file_path, file_content):
+    """
+    Upload a single file to S3.
+    """
+    s3_client.put_object(
+        Bucket=S3_BUCKET,
+        Key=file_path,
+        Body=file_content,
+        ContentType="text/plain",  # Set the MIME type to plaintext
+        ACL="public-read",
+    )
+    print("uploaded", file_path)
