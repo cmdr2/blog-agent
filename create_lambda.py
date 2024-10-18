@@ -226,6 +226,6 @@ if __name__ == "__main__":
  a. DROPBOX_TOKEN as the access token created in your Dropbox App Console.
  b. DROPBOX_APP_SECRET as the app secret copied from your Dropbox App Console.
 
-2. Please open the Dropbox app console, and set this URL as the webhook: {url}
+2. Please open the Dropbox app console, and set the webhook URL to: {url}
 """
     )
