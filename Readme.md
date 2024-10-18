@@ -5,12 +5,13 @@ Publish a blog to S3 automatically using text files in Dropbox.
 
 ## Configure
 ### Step 1: Create a Dropbox access token
-  a. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/).
-  b. Create a new app. Choose `Scoped access`, then `App folder` and then give it any name, like `blog-agent`.
-  c. Set the folder name to whatever you want. **Note:** This will always be *inside* the `/Apps` folder in Dropbox!
-  d. Click `Generate Access Token` and copy the generated token. Keep this safely, we'll need it later.
-  e. Also copy the `App Secret` and keep it safely for later.
-  f. Open the `Permissions` tab, and enable `files.content.read` and press `Save`.
+1. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/).
+2. Create a new app. Choose `Scoped access`, then `App folder` and then give it any name, like `blog-agent`.
+3. Set the folder name to whatever you want. **Note:** This will always be *inside* the `/Apps` folder in Dropbox!
+4. Click `Generate Access Token` and copy the generated token. Keep this safely, we'll need it later.
+5. Also copy the `App Secret` and keep it safely for later.
+6. Open the `Permissions` tab, and enable `files.content.read` and press `Save`.
+
 
 ### Step 2: Create an AWS Lambda function
 You have two options for this step: an [automated script](create_lambda.py) or a manual approach. I recommend the automated script.
@@ -33,6 +34,7 @@ Create a Lambda function with the latest Python runtime, HTTP Function URL, and 
 Then set the following environment variables on the Lambda function in the AWS Console: `S3_BUCKET`, `S3_PREFIX`, `DROPBOX_FOLDER_PATH`, `DROPBOX_TOKEN` and `DROPBOX_APP_SECRET`.
 
 `DROPBOX_TOKEN` is the access token created in your Dropbox App Console. `DROPBOX_APP_SECRET` is the app secret copied from your Dropbox App Console.
+
 
 ### Step 3: Configure the Dropbox webhook
 1. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/), and open your app inside that.
