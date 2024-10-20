@@ -26,6 +26,8 @@ def zip_lambda_files():
 
 
 def create_lambda_function(lambda_name, s3_bucket, s3_prefix, dropbox_folder_path):
+    print("Okay, starting the process..")
+
     # Get AWS account ID
     account_id = get_account_id()
 
@@ -238,7 +240,9 @@ if __name__ == "__main__":
     lambda_name = input("Enter the Lambda function name: ")
     s3_bucket = input("Enter the S3 bucket name: ")
     s3_prefix = input("Enter the S3 path prefix: ")
-    dropbox_folder_path = input("Enter the Dropbox folder path (do *not* include /Apps/blog-agent at the start): ")
+    dropbox_folder_path = input(
+        "Enter the Dropbox folder name inside `/Apps/blog-agent` (where you'll save your posts): "
+    )
 
     if not validate_lambda_name(lambda_name):
         raise RuntimeError(

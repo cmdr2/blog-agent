@@ -7,7 +7,7 @@ Publish a blog to S3 automatically using text files in Dropbox.
 ### Step 1: Create a Dropbox access token
 1. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/).
 2. Create a new app. Choose `Scoped access`, then `App folder` and then give it the name `blog-agent`.
-3. Set the folder name to whatever you want. **Note:** This will always be *inside* the `/Apps/blog-agent` folder in Dropbox! E.g. "posts"
+3. Set the folder name to `blog-agent`. **Note:** This will create the `/Apps/blog-agent` folder in Dropbox!
 4. Copy the `App Key` and `App Secret` from the console. Keep this safely, we'll need it later.
 5. Open the `Permissions` tab, and enable `files.content.read` and press `Save`.
 
@@ -25,9 +25,7 @@ The [automated script](create_lambda.py) will create the Lambda function, IAM Ro
 #### Option B: Manual approach
 You can also do these steps manually, if you'd prefer.
 
-Create a Lambda function with the latest Python runtime, HTTP Function URL, and no authentication. Then create the necessary IAM Roles to allow it to read buckets, read object and write object to the desired S3 Bucket at the desired S3 folder path.
-
-Then set the following environment variables: `S3_BUCKET`, `S3_PREFIX` and `DROPBOX_FOLDER_PATH`. The value of `DROPBOX_FOLDER_PATH` will be the Dropbox folder name inside `/Apps/blog-agent`.
+Create a Lambda function with the latest Python runtime, HTTP Function URL, and no authentication. Then create the necessary IAM Roles to allow it to read buckets, read object and write object to the desired S3 Bucket at the desired S3 folder path. Copy the Lambda function URL.
 
 
 ### Step 3: Create a Dropbox Refresh token
@@ -46,10 +44,10 @@ Follow the steps described [here](https://web.archive.org/web/20230228083012/htt
 
 
 ### Step 4: Set the environment variables
-Open the Lambda function in the AWS Console, open `Configuration` > `Environment Variables`, and set the following variables:
+Open the Lambda function in the AWS Console, open `Configuration` > `Environment Variables`. Click `Edit` and add the following variables:
 1. `DROPBOX_REFRESH_TOKEN` (from Step 3)
-2. `DROPBOX_APP_SECRET` (from Step 1)
-3. `DROPBOX_APP_KEY` (from Step 1)
+2. `DROPBOX_APP_KEY` (from Step 1)
+3. `DROPBOX_APP_SECRET` (from Step 1)
 
 ### Step 5: Configure the Dropbox webhook
 1. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/), and open your app inside that.
