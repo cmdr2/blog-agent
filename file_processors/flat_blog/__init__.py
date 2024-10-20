@@ -7,7 +7,6 @@ from .markdown_to_html import MarkdownToHtmlConverter
 HEAD = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../../styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
@@ -97,6 +96,7 @@ def process_post(post_contents: str) -> str:
 <html lang="en">
 <head>
 {HEAD}
+    <link rel="stylesheet" href="../../../styles.css">
 </head>
 <body>
     <script>
@@ -122,6 +122,7 @@ def generate_index(file_dict):
 <html lang="en">
 <head>
 {HEAD}
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <script>
