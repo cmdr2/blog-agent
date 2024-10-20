@@ -13,6 +13,7 @@ HEAD = """
     <title>Post</title>
 """
 
+
 def process_files(file_iterator):
     file_dict = {}
     dir_name = os.path.dirname(__file__)
@@ -118,6 +119,8 @@ def generate_index(file_dict):
     for filename in file_dict.keys():
         post_list.append(f'<li><a href="{filename}">{filename}</a></li>')
 
+    posts_html = "\n        ".join(post_list)
+
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -129,7 +132,7 @@ def generate_index(file_dict):
         Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
     </script>
     <ul id="posts">
-        {"\n        ".join(post_list)}
+        {posts_html}
     </ul>
 </body>
 </html>
