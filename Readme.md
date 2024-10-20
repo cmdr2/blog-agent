@@ -3,45 +3,74 @@ Publish a blog to S3 automatically using text files in Dropbox.
 
 **Tip:** If you save very frequently while writing text files (like I do), consider pausing Dropbox sync while you write and resuming after you've finished editing. This will avoid frequent republishes and Lambda calls.
 
-## Configure
+## Installation
 ### Step 1: Create a Dropbox access token
 1. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/).
 2. Create a new app. Choose `Scoped access`, then `App folder` and then give it the name `blog-agent`.
 3. Set the folder name to whatever you want. **Note:** This will always be *inside* the `/Apps/blog-agent` folder in Dropbox! E.g. "posts"
-4. Click `Generate Access Token` and copy the generated token. Keep this safely, we'll need it later.
-5. Also copy the `App Secret` and keep it safely for later.
-6. Open the `Permissions` tab, and enable `files.content.read` and press `Save`.
+4. Copy the `App Key` and `App Secret` from the console. Keep this safely, we'll need it later.
+5. Open the `Permissions` tab, and enable `files.content.read` and press `Save`.
 
 
 ### Step 2: Create an AWS Lambda function
-You have two options for this step: an [automated script](create_lambda.py) or a manual approach. I recommend the automated script.
+You can create the Lambda function using the [automated script](create_lambda.py), or do it manually. I recommend the automated script.
 
-#### Option 1: Automated script
+#### Option A: Automated script
 The [automated script](create_lambda.py) will create the Lambda function, IAM Roles, Permission Policies and link them together.
 
 1. Ensure that you have the [AWS CLI](https://aws.amazon.com/cli/) installed and configured correctly.
 2. Run `python create_lambda.py`. Enter the desired Lambda function name, e.g. 'blog-agent', the S3 bucket name, the S3 folder path, and the Dropbox folder name inside `/Apps/blog-agent`
 3. **Important:** Note down the function URL printed at the end.
-4. Finally, open the lambda function in the AWS Console, open `Configuration` > `Environment Variables`, and set the `DROPBOX_TOKEN` and `DROPBOX_APP_SECRET` environment variables.
 
-`DROPBOX_TOKEN` is the access token created in your Dropbox App Console. `DROPBOX_APP_SECRET` is the app secret copied from your Dropbox App Console.
-
-#### Option 2: Manual approach
+#### Option B: Manual approach
 You can also do these steps manually, if you'd prefer.
 
 Create a Lambda function with the latest Python runtime, HTTP Function URL, and no authentication. Then create the necessary IAM Roles to allow it to read buckets, read object and write object to the desired S3 Bucket at the desired S3 folder path.
 
-Then set the following environment variables on the Lambda function in the AWS Console: `S3_BUCKET`, `S3_PREFIX`, `DROPBOX_FOLDER_PATH`, `DROPBOX_TOKEN` and `DROPBOX_APP_SECRET`.
-
-`DROPBOX_TOKEN` is the access token created in your Dropbox App Console. `DROPBOX_APP_SECRET` is the app secret copied from your Dropbox App Console.
+Then set the following environment variables: `S3_BUCKET`, `S3_PREFIX` and `DROPBOX_FOLDER_PATH`. The value of `DROPBOX_FOLDER_PATH` will be the Dropbox folder name inside `/Apps/blog-agent`.
 
 
-### Step 3: Configure the Dropbox webhook
+### Step 3: Create a Dropbox Refresh token
+You can create the Dropbox Refresh token using the [automated script](create_dropbox_refresh_token.py), or do this manually. I again recommend the automated script.
+
+#### Option A: Automated script
+The [automated script](create_dropbox_refresh_token.py) will call the required Dropbox APIs and create the Refresh token.
+
+1. Run `python create_dropbox_refresh_token.py`. Enter the `App Key` (that you copied in Step 1) and press Enter. This will open a Browser window.
+2. Click "Approve app" in the browser window. This will approve the Dropbox app that you created in Step 1.
+3. Return to the command prompt window, and enter the `Authorization Code` displayed in the browser window.
+4. Copy the `Refresh token` printed at the end.
+
+#### Option B: Manual approach
+Follow the steps described [here](https://web.archive.org/web/20230228083012/https://www.dropboxforum.com/t5/Dropbox-API-Support-Feedback/Get-refresh-token-from-access-token/m-p/596755/highlight/true#M27728)
+
+
+### Step 4: Set the environment variables
+Open the Lambda function in the AWS Console, open `Configuration` > `Environment Variables`, and set the following variables:
+1. `DROPBOX_REFRESH_TOKEN` (from Step 3)
+2. `DROPBOX_APP_SECRET` (from Step 1)
+3. `DROPBOX_APP_KEY` (from Step 1)
+
+### Step 5: Configure the Dropbox webhook
 1. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/), and open your app inside that.
 2. Under the `Settings` tab, scroll down to the `Webhooks` entry, and set the newly created function's URL and press `Save`.
 
 
-### Step 4: You're done!
+### Step 6: You're done!
 You can now create a folder inside the `/Apps/blog-agent` Dropbox folder, and name it whatever you configured previously, e.g. "posts".
 
 After that, any text files that you create inside that folder will be published to S3 automatically. E.g. `/Apps/blog-agent/posts/October 2024.txt` will automatically get published to `https://your_s3_bucket_url/your_path_prefix/posts/October 2024.txt`.
+
+
+## Configuration
+`blog-agent` can be configured via the following environment variables on the Lambda function:
+* `DROPBOX_FOLDER_PATH` - the Dropbox folder name inside `/Apps/blog-agent`.
+* `S3_BUCKET` - the S3 bucket to upload the blog to.
+* `S3_PREFIX` - the S3 path to upload the blog at.
+* `DROPBOX_REFRESH_TOKEN` - the `Refresh token` generated by Dropbox for authentication.
+* `DROPBOX_APP_KEY` - the `App Key` token from the Dropbox App Console.
+* `DROPBOX_APP_SECRET` - the `App Secret` token from the Dropbox App Console.
+
+* `FILE_PROCESSOR` - `passthrough` or `flat_blog` (default).
+** `passthrough` will just copy the files from Dropbox to S3, without any processing.
+** `flat_blog` will split the text files into individual posts, generate an `index.html` and a `styles.css` file for a blog.

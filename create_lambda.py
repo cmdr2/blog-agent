@@ -249,13 +249,3 @@ if __name__ == "__main__":
     s3_prefix = ensure_slashes(s3_prefix, start=False, end=False)
 
     url = create_lambda_function(lambda_name, s3_bucket, s3_prefix, dropbox_folder_path)
-
-    print(
-        f"""Next steps:
-1. Please open the lambda function in the AWS Console, and set these environment variables:
- a. DROPBOX_TOKEN as the access token created in your Dropbox App Console.
- b. DROPBOX_APP_SECRET as the app secret copied from your Dropbox App Console.
-
-2. Please open the Dropbox app console, and set the webhook URL to: {url}
-"""
-    )
