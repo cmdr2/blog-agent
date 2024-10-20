@@ -130,6 +130,8 @@ def create_lambda_function(lambda_name, s3_bucket, s3_prefix, dropbox_folder_pat
         f"{function_name}.lambda_handler",
         "--zip-file",
         f"fileb://{zip_file_name}",
+        "--timeout",
+        "30",
         "--environment",
         json.dumps(environment_vars),
     ]
