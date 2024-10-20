@@ -5,7 +5,7 @@ import zipfile
 import io
 import boto3
 import importlib
-from concurrent.futures import ThreadPoolExecutor
+import threading
 from mimetypes import guess_type
 
 from hashlib import sha256
@@ -136,16 +136,16 @@ def batch_upload_to_s3(file_dict):
     Uploads all files to S3 in a batch operation using threading for concurrent uploads.
     - file_dict: A dictionary where keys are S3 file paths and values are file contents.
     """
-    # with ThreadPoolExecutor() as executor:
-    #     futures = [executor.submit(upload_file, path, content) for path, content in file_dict.items()]
 
-    #     # Wait for all futures to complete
-    #     for future in futures:
-    #         future.result()  # Raise any exceptions that occurred during the upload
-    #         print("future done", future)
+    threads = []
 
     for path, content in file_dict.items():
-        upload_file(path, content)
+        t = threading.Thread(target=upload_file, args=(path, content))
+        t.start()
+        threads.append(t)
+
+    for t in threads:
+        t.join()
 
 
 def upload_file(file_path, file_content):
