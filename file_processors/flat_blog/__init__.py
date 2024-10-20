@@ -27,6 +27,9 @@ def process_files(file_iterator):
     # include index.html
     file_dict["index.html"] = generate_index(file_dict)
 
+    # flatten the content
+    file_dict = {k: v[0] for k, v in file_dict.items()}
+
     # include styles.css
     styles_path = os.path.join(dir_name, "styles.css")
     with open(styles_path, "r") as f:
@@ -93,6 +96,14 @@ def process_post(post_contents: str) -> str:
     )
 
     # Construct the HTML file
+    article_html = f"""
+    <article class="post">
+        <time class="date">{post_date}</time>
+        {tags_html}
+        {html_body}
+    </article>
+"""
+
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -103,21 +114,26 @@ def process_post(post_contents: str) -> str:
     <script>
         Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
     </script>
-    <article class="post">
-        <time class="date">{post_date}</time>
-        {tags_html}
-        {html_body}
-    </article>
+    {article_html}
 </body>
 </html>
 """
-    return html_content
+    return html_content, article_html
 
 
 def generate_index(file_dict):
+    filenames = list(file_dict.keys())
+    filenames.reverse()
+
     post_list = []
-    for filename in file_dict.keys():
-        post_list.append(f'<li><a href="{filename}">{filename}</a></li>')
+    for filename in filenames:
+        # for filename, content in file_dict.items():
+        content = file_dict[filename]
+        article_html = content[1]
+        article_html = article_html.replace('<time class="date">', f'<time class="date"><a href="{filename}">')
+        article_html = article_html.replace("</time>", "</a></time>")
+
+        post_list.append(f"{article_html}")
 
     posts_html = "\n        ".join(post_list)
 
@@ -131,11 +147,11 @@ def generate_index(file_dict):
     <script>
         Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
     </script>
-    <ul id="posts">
-        {posts_html}
-    </ul>
+    <div class="post_list">
+    {posts_html}
+    </div>
 </body>
 </html>
 """
 
-    return html_content
+    return html_content, ""
