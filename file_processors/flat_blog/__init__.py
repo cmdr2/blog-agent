@@ -2,6 +2,9 @@
 
 import os
 import re
+import time
+import hashlib
+
 from .markdown_to_html import MarkdownToHtmlConverter
 
 HEAD = """
@@ -62,9 +65,9 @@ def process_file(filename: str, file_contents: bytes) -> dict:
     for i, post in enumerate(posts):
         post = post.strip()
         if post:
-            post_id = str(i)  # str(uuid.uuid4())
+            post_id, *data = process_post(post)
             key = f"{dir_path}/{year}/{month_int}/{post_id}.html"
-            post_dict[key] = process_post(post)
+            post_dict[key] = data
 
     return post_dict
 
@@ -78,6 +81,8 @@ def process_post(post_contents: str) -> str:
     # Extract date and initialize variables
     post_date = lines[0]
     tags = []
+
+    post_id = sha256_hash(post_date)[:16]
 
     # Check for tags line
     if len(lines) > 2 and lines[2].startswith("#"):
@@ -95,6 +100,8 @@ def process_post(post_contents: str) -> str:
         '<ul class="tags">' + "".join(f'<li class="tag">{tag[1:]}</li>' for tag in tags) + "</ul>" if tags else ""
     )
 
+    t = time.time()
+
     # Construct the HTML file
     article_html = f"""
     <article class="post">
@@ -108,7 +115,7 @@ def process_post(post_contents: str) -> str:
 <html lang="en">
 <head>
 {HEAD}
-    <link rel="stylesheet" href="../../../styles.css">
+    <link rel="stylesheet" href="../../../styles.css?v={t}">
 </head>
 <body>
     <script>
@@ -118,12 +125,14 @@ def process_post(post_contents: str) -> str:
 </body>
 </html>
 """
-    return html_content, article_html
+    return post_id, html_content, article_html
 
 
 def generate_index(file_dict):
     filenames = list(file_dict.keys())
     filenames.reverse()
+
+    t = time.time()
 
     post_list = []
     for filename in filenames:
@@ -141,7 +150,7 @@ def generate_index(file_dict):
 <html lang="en">
 <head>
 {HEAD}
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v={t}">
 </head>
 <body>
     <script>
@@ -155,3 +164,7 @@ def generate_index(file_dict):
 """
 
     return html_content, ""
+
+
+def sha256_hash(text):
+    return hashlib.sha256(text.encode()).hexdigest()
