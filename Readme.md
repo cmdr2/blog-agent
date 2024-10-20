@@ -3,6 +3,8 @@ Publish a blog to S3 automatically using text files in Dropbox.
 
 **Tip:** If you save very frequently while writing text files (like I do), consider pausing Dropbox sync while you write and resuming after you've finished editing. This will avoid frequent republishes and Lambda calls.
 
+Future work: Rewrite this to use Hugo as a layer, and create a `Go`-lang runtime instead of Python.
+
 ## Installation
 ### Step 1: Create a Dropbox access token
 1. Open the [Dropbox Apps Console](https://www.dropbox.com/developers/apps/).
