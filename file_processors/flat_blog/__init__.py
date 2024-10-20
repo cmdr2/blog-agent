@@ -4,14 +4,48 @@ import os
 import re
 from .markdown_to_html import MarkdownToHtmlConverter
 
+HEAD = """
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../../styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <title>Post</title>
+"""
 
-def process_file(filename: str, file_contents: str) -> dict:
+def process_files(file_iterator):
+    file_dict = {}
+    dir_name = os.path.dirname(__file__)
+
+    # process the text files
+    for filename, content in file_iterator:
+        files = process_file(filename, content)
+        if files:
+            file_dict.update(files)
+
+    # include index.html
+    file_dict["index.html"] = generate_index(file_dict)
+
+    # include styles.css
+    styles_path = os.path.join(dir_name, "styles.css")
+    with open(styles_path, "r") as f:
+        file_dict[f"styles.css"] = f.read()
+
+    print(file_dict.keys())
+
+    return file_dict
+
+
+def process_file(filename: str, file_contents: bytes) -> dict:
     dir_path = os.path.dirname(filename)
     name = os.path.basename(filename)
     name, ext = os.path.splitext(name)
 
     if ext.lower() != ".txt":
         return
+
+    file_contents = file_contents.decode()
 
     # Extract month and year from the filename
     month_name, year = name.split(" ")
@@ -28,14 +62,6 @@ def process_file(filename: str, file_contents: str) -> dict:
             post_id = str(i)  # str(uuid.uuid4())
             key = f"{dir_path}/{year}/{month_int}/{post_id}.html"
             post_dict[key] = process_post(post)
-
-    dir_name = os.path.dirname(__file__)
-    styles_path = os.path.join(dir_name, "styles.css")
-
-    with open(styles_path, "r") as f:
-        post_dict[f"{dir_path}/styles.css"] = f.read()
-
-    print(post_dict.keys())
 
     return post_dict
 
@@ -70,13 +96,7 @@ def process_post(post_contents: str) -> str:
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-    <title>Post</title>
+{HEAD}
 </head>
 <body>
     <script>
@@ -90,4 +110,28 @@ def process_post(post_contents: str) -> str:
 </body>
 </html>
 """
+    return html_content
+
+
+def generate_index(file_dict):
+    post_list = []
+    for filename in file_dict.keys():
+        post_list.append(f'<li><a href="{filename}">{filename}</a></li>')
+
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+{HEAD}
+</head>
+<body>
+    <script>
+        Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+    </script>
+    <ul id="posts">
+        {"\n        ".join(post_list)}
+    </ul>
+</body>
+</html>
+"""
+
     return html_content

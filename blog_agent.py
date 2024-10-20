@@ -73,14 +73,8 @@ def lambda_handler(event, context):
     zip_data = download_journal_zip()
 
     # Step 2: Extract and copy files to S3
-    file_dict = {}  # Dictionary to store file paths and contents for batch upload
-    with zipfile.ZipFile(io.BytesIO(zip_data), "r") as zip_ref:
-        for file_info in zip_ref.infolist():
-            with zip_ref.open(file_info.filename) as file:
-                # Step 3: Process the file using process_file
-                files = file_processor.process_file(file_info.filename, file.read().decode())
-                if files:
-                    file_dict.update(files)
+    zip_files_iterator = unzip_files(io.BytesIO(zip_data))
+    file_dict = file_processor.process_files(zip_files_iterator)
 
     # Step 4: Batch upload files to S3
     batch_upload_to_s3(file_dict)
@@ -102,6 +96,13 @@ def download_journal_zip():
         raise Exception(f"Dropbox API request failed with status {response.status}: {response.reason}")
 
     return response.read()
+
+
+def unzip_files(zip_path):
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        for file_info in zip_ref.infolist():
+            with zip_ref.open(file_info) as file:
+                yield file_info.filename, file.read()
 
 
 def batch_upload_to_s3(file_dict):
