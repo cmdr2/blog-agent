@@ -25,7 +25,7 @@ The [automated script](create_lambda.py) will create the Lambda function, IAM Ro
 #### Option B: Manual approach
 You can also do these steps manually, if you'd prefer.
 
-Create a Lambda function with the latest Python runtime, HTTP Function URL, and no authentication. Then create the necessary IAM Roles to allow it to read buckets, read object and write object to the desired S3 Bucket at the desired S3 folder path. Copy the Lambda function URL.
+Create a Lambda function with the latest Python runtime, HTTP Function URL, 30 second timeout, and no authentication. Then create the necessary IAM Roles to allow it to read buckets, read object and write object to the desired S3 Bucket at the desired S3 folder path. Copy the Lambda function URL.
 
 
 ### Step 3: Create a Dropbox Refresh token
