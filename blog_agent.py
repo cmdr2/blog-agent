@@ -25,6 +25,9 @@ BLOG_TITLE = os.environ.get("BLOG_TITLE", "Blog")
 BLOG_URL = os.environ.get("BLOG_URL", "https://your-blog-address.com")
 BLOG_AUTHOR = os.environ.get("BLOG_AUTHOR")
 BLOG_EMAIL = os.environ.get("BLOG_EMAIL")
+SOCIAL_GITHUB_USERNAME = os.environ.get("SOCIAL_GITHUB_USERNAME")
+SOCIAL_X_USERNAME = os.environ.get("SOCIAL_X_USERNAME")
+SOCIAL_DISCORD_USERNAME = os.environ.get("SOCIAL_DISCORD_USERNAME")
 
 if FILE_PROCESSOR not in VALID_FILE_PROCESSORS:
     raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
@@ -81,6 +84,12 @@ def lambda_handler(event, context):
         config["blog_author"] = BLOG_AUTHOR
     if BLOG_EMAIL:
         config["blog_email"] = BLOG_EMAIL
+    if SOCIAL_DISCORD_USERNAME:
+        config["social_discord_username"] = SOCIAL_DISCORD_USERNAME
+    if SOCIAL_GITHUB_USERNAME:
+        config["social_github_username"] = SOCIAL_GITHUB_USERNAME
+    if SOCIAL_X_USERNAME:
+        config["social_x_username"] = SOCIAL_X_USERNAME
 
     # Step 1: Download the journal folder as a zip file from Dropbox
     zip_data = download_journal_zip()

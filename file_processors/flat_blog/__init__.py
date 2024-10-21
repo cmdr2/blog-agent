@@ -123,14 +123,11 @@ def process_post(post_contents: str, config) -> str:
     </article>
 """
 
-    social_html = """
-    <script>
-        document.getElementById('discord-link').addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent the default link behavior
-            alert('cmdr2 is the discord username'); // Show the alert
-        });
-    </script>
-"""
+    # social
+    social_links, social_footer, social_script_tag = get_social_content(config)
+
+    if social_footer:
+        social_footer = "<footer>" + social_footer + "</footer>"
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -142,16 +139,7 @@ def process_post(post_contents: str, config) -> str:
 <body>
     <header>
         <h1>
-            <a href="../../../index.html">{blog_title}</a>
-            <a href="https://github.com/cmdr2" target="_blank" class="social-icon">
-                <i class="fab fa-github"></i>
-            </a>
-            <a href="https://x.com/cmdr2" target="_blank" class="social-icon">
-                <i class="fab fa-x"></i>
-            </a>
-            <a href="#" id="discord-link" target="_blank" class="social-icon">
-                <i class="fab fa-discord"></i>
-            </a>
+            <a href="../../../index.html">{blog_title}</a>{social_links}
         </h1>
     </header>
     <script>
@@ -159,7 +147,9 @@ def process_post(post_contents: str, config) -> str:
     </script>
     {article_html}
 
-    {social_html}
+    {social_footer}
+
+    {social_script_tag}
 </body>
 </html>
 """
@@ -212,14 +202,11 @@ def generate_index(file_dict, config):
     </script>
 """
 
-    social_html = """
-    <script>
-        document.getElementById('discord-link').addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent the default link behavior
-            alert('cmdr2 is the discord username'); // Show the alert
-        });
-    </script>
-"""
+    # social
+    social_links, social_footer, social_script_tag = get_social_content(config)
+
+    if social_footer:
+        social_footer = "<footer>" + social_footer + "</footer>"
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -231,16 +218,7 @@ def generate_index(file_dict, config):
 <body>
     <header>
         <h1>
-            {blog_title}
-            <a href="https://github.com/cmdr2" target="_blank" class="social-icon">
-                <i class="fab fa-github"></i>
-            </a>
-            <a href="https://x.com/cmdr2" target="_blank" class="social-icon">
-                <i class="fab fa-x"></i>
-            </a>
-            <a href="#" id="discord-link" target="_blank" class="social-icon">
-                <i class="fab fa-discord"></i>
-            </a>
+            {blog_title}{social_links}
         </h1>
     </header>
     
@@ -253,7 +231,9 @@ def generate_index(file_dict, config):
 
     {format_entries_html}
 
-    {social_html}
+    {social_footer}
+
+    {social_script_tag}
 </body>
 </html>
 """
@@ -333,3 +313,69 @@ def generate_atom_feed(file_dict, config):
 
 def sha256_hash(text):
     return hashlib.sha256(text.encode()).hexdigest()
+
+
+def get_social_content(config):
+    social_x = config.get("social_x_username")
+    social_github = config.get("social_github_username")
+    social_discord = config.get("social_discord_username")
+
+    social_script_tag = ""
+    social_links = ""
+    social_footer = []
+    if social_discord:
+        social_script_tag += (
+            """
+        <script>
+            const links = document.querySelectorAll('.discord-link')
+            links.forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault(); // Prevent the default link behavior
+                    alert('"""
+            + social_discord
+            + """ is the discord username'); // Show the alert
+                });
+            })
+        </script>
+    """
+        )
+
+    if social_x or social_discord or social_github:
+        if social_github:
+            social_links += f"""
+            <a href="https://github.com/{social_github}" target="_blank" class="social-icon">
+                <i class="fab fa-github"></i>
+            </a>"""
+
+            social_footer.append(
+                f"""
+            <a href="https://github.com/{social_github}" target="_blank">
+                [github]
+            </a>"""
+            )
+        if social_x:
+            social_links += f"""
+            <a href="https://x.com/{social_x}" target="_blank" class="social-icon">
+                <i class="fab fa-x"></i>
+            </a>"""
+
+            social_footer.append(
+                f"""
+            <a href="https://x.com/{social_x}" target="_blank">
+                [x]
+            </a>"""
+            )
+        if social_discord:
+            social_links += f"""
+            <a href="#" class="discord-link" target="_blank" class="social-icon">
+                <i class="fab fa-discord"></i>
+            </a>"""
+
+            social_footer.append(
+                f"""
+            <a href="#" class="discord-link" target="_blank">
+                [discord]
+            </a>"""
+            )
+
+    return social_links, "".join(social_footer), social_script_tag
