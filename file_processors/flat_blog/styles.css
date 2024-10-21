@@ -15,12 +15,24 @@ header {
     padding: 0.75em 1.2em;
     font-size: 1.5em;
     border-bottom: 1px solid #3e3d32;
+    display: flex;
+    align-items: center;
 }
 header h1 {
     margin: 0;
 }
 header h1 a {
     color: #a6e22e;
+}
+
+.social-icon {
+    margin-left: 10px; /* Space between title and icons */
+    color: #66d9ef; /* Icon color */
+    text-decoration: none; /* Remove underline */
+}
+
+.social-icon:hover {
+    color: #ff79c6; /* Change color on hover */
 }
 
 /* Links */

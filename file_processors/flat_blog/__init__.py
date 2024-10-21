@@ -18,6 +18,7 @@ HEAD = """
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Post</title>
 """
 
@@ -122,6 +123,15 @@ def process_post(post_contents: str, config) -> str:
     </article>
 """
 
+    social_html = """
+    <script>
+        document.getElementById('discord-link').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default link behavior
+            alert('cmdr2 is the discord username'); // Show the alert
+        });
+    </script>
+"""
+
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -131,12 +141,25 @@ def process_post(post_contents: str, config) -> str:
 </head>
 <body>
     <header>
-    <h1><a href="../../../index.html">{blog_title}</a></h1>
+        <h1>
+            <a href="../../../index.html">{blog_title}</a>
+            <a href="https://github.com/cmdr2" target="_blank" class="social-icon">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://x.com/cmdr2" target="_blank" class="social-icon">
+                <i class="fab fa-x"></i>
+            </a>
+            <a href="#" id="discord-link" target="_blank" class="social-icon">
+                <i class="fab fa-discord"></i>
+            </a>
+        </h1>
     </header>
     <script>
         Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
     </script>
     {article_html}
+
+    {social_html}
 </body>
 </html>
 """
@@ -189,6 +212,15 @@ def generate_index(file_dict, config):
     </script>
 """
 
+    social_html = """
+    <script>
+        document.getElementById('discord-link').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default link behavior
+            alert('cmdr2 is the discord username'); // Show the alert
+        });
+    </script>
+"""
+
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -198,8 +230,20 @@ def generate_index(file_dict, config):
 </head>
 <body>
     <header>
-    <h1>{blog_title}</h1>
+        <h1>
+            {blog_title}
+            <a href="https://github.com/cmdr2" target="_blank" class="social-icon">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://x.com/cmdr2" target="_blank" class="social-icon">
+                <i class="fab fa-x"></i>
+            </a>
+            <a href="#" id="discord-link" target="_blank" class="social-icon">
+                <i class="fab fa-discord"></i>
+            </a>
+        </h1>
     </header>
+    
     <script>
         Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
     </script>
@@ -208,6 +252,8 @@ def generate_index(file_dict, config):
     </div>
 
     {format_entries_html}
+
+    {social_html}
 </body>
 </html>
 """
