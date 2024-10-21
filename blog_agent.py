@@ -28,7 +28,7 @@ BLOG_EMAIL = os.environ.get("BLOG_EMAIL")
 SOCIAL_GITHUB_USERNAME = os.environ.get("SOCIAL_GITHUB_USERNAME")
 SOCIAL_X_USERNAME = os.environ.get("SOCIAL_X_USERNAME")
 SOCIAL_DISCORD_USERNAME = os.environ.get("SOCIAL_DISCORD_USERNAME")
-BLOG_POSTS_PER_PAGE = os.environ.get("BLOG_POSTS_PER_PAGE", 50)
+BLOG_POSTS_PER_PAGE = int(os.environ.get("BLOG_POSTS_PER_PAGE", 20))
 
 if FILE_PROCESSOR not in VALID_FILE_PROCESSORS:
     raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
@@ -80,7 +80,7 @@ def lambda_handler(event, context):
         return {"statusCode": 404, "body": "Not found"}
 
     # gather config
-    config = {"blog_title": BLOG_TITLE, "blog_url": BLOG_URL}
+    config = {"blog_title": BLOG_TITLE, "blog_url": BLOG_URL, "blog_posts_per_page": BLOG_POSTS_PER_PAGE}
     if BLOG_AUTHOR:
         config["blog_author"] = BLOG_AUTHOR
     if BLOG_EMAIL:
