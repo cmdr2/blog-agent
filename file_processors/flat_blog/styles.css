@@ -161,4 +161,14 @@ footer {
     html {
         font-size: 110%; /* Increase font size slightly for mobile devices */
     }
+
+    article:not(.post_list article) {
+        margin: 0.5em;
+        padding: 0.2em;
+        padding-left: 0.15em;
+    }
+
+    .post_list article {
+        margin: 1.5em 0.75em;
+    }
 }
