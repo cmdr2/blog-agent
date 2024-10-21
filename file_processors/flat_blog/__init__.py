@@ -343,7 +343,7 @@ def get_social_content(config):
     if social_x or social_discord or social_github:
         if social_github:
             social_links += f"""
-            <a href="https://github.com/{social_github}" target="_blank" class="social-icon">
+            <a href="https://github.com/{social_github}" target="_blank" class="social-icon" title="GitHub">
                 <i class="fab fa-github"></i>
             </a>"""
 
@@ -355,7 +355,7 @@ def get_social_content(config):
             )
         if social_x:
             social_links += f"""
-            <a href="https://x.com/{social_x}" target="_blank" class="social-icon">
+            <a href="https://x.com/{social_x}" target="_blank" class="social-icon" title="X">
                 <i class="fab fa-x"></i>
             </a>"""
 
@@ -367,7 +367,7 @@ def get_social_content(config):
             )
         if social_discord:
             social_links += f"""
-            <a href="#" class="social-icon discord-link" target="_blank">
+            <a href="#" class="social-icon discord-link" target="_blank" title="Discord">
                 <i class="fab fa-discord"></i>
             </a>"""
 
