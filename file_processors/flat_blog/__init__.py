@@ -155,6 +155,7 @@ def generate_index(file_dict):
             article.addEventListener('click', function() {
                 const postUrl = article.querySelector('.date a').getAttribute('href')
                 window.location.href = postUrl
+                return false
             });
         });
     </script>
