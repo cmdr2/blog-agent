@@ -123,7 +123,7 @@ def process_post(post_contents: str, config) -> str:
 </head>
 <body>
     <header>
-    <h1>{blog_title}</h1>
+    <h1><a href="../../../index.html">{blog_title}</a></h1>
     </header>
     <script>
         Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
