@@ -4,6 +4,8 @@ import os
 import re
 import time
 import hashlib
+import xml.etree.ElementTree as ET
+from datetime import datetime, timezone
 
 from .markdown_to_html import MarkdownToHtmlConverter
 
@@ -30,8 +32,13 @@ def process_files(file_iterator, config={}):
         if files:
             file_dict.update(files)
 
-    # include index.html
-    file_dict["index.html"] = generate_index(file_dict, config)
+    # generate index.html and atom.xml
+    atom_xml = generate_atom_feed(file_dict, config)
+    index_html = generate_index(file_dict, config)
+
+    # include index.html and atom.xml
+    file_dict["index.html"] = index_html
+    file_dict["atom.xml"] = atom_xml
 
     # flatten the content
     file_dict = {k: v[0] for k, v in file_dict.items()}
@@ -120,6 +127,7 @@ def process_post(post_contents: str, config) -> str:
 <head>
 {HEAD}
     <link rel="stylesheet" href="../../../styles.css?v={t}">
+    <link rel="alternate" type="application/atom+xml" href="../../../atom.xml" title="Your Blog Title">
 </head>
 <body>
     <header>
@@ -132,7 +140,7 @@ def process_post(post_contents: str, config) -> str:
 </body>
 </html>
 """
-    return post_id, html_content, article_html
+    return post_id, html_content, article_html, post_date
 
 
 def generate_index(file_dict, config):
@@ -186,6 +194,7 @@ def generate_index(file_dict, config):
 <head>
 {HEAD}
     <link rel="stylesheet" href="styles.css?v={t}">
+    <link rel="alternate" type="application/atom+xml" href="atom.xml" title="Your Blog Title">
 </head>
 <body>
     <header>
@@ -203,7 +212,73 @@ def generate_index(file_dict, config):
 </html>
 """
 
-    return html_content, ""
+    return html_content, "", ""
+
+
+def generate_atom_feed(file_dict, config):
+    # Create the root feed element
+    feed = ET.Element("feed", xmlns="http://www.w3.org/2005/Atom")
+
+    # Feed title
+    title = ET.SubElement(feed, "title")
+    title.text = config.get("blog_title", "Your Feed Title")
+
+    # Link element
+    feed_link = config.get("feed_url", "https://yourwebsite.com")
+    link = ET.SubElement(feed, "link", href=feed_link, rel="self")
+
+    # Updated element with the current time
+    updated = ET.SubElement(feed, "updated")
+    updated.text = datetime.now(timezone.utc).isoformat() + "Z"
+
+    # Author element
+    if "feed_author" in config or "feed_email" in config:
+        author = ET.SubElement(feed, "author")
+
+        if "feed_author" in config:
+            name = ET.SubElement(author, "name")
+            name.text = config["feed_author"]
+
+        if "feed_email" in config:
+            email = ET.SubElement(author, "email")
+            email.text = config["feed_email"]
+
+    # Create entries for each article
+    for filename, content in file_dict.items():
+        _, article_content, article_date_str = content
+        article_link = feed_link + "/" + filename
+
+        # Parse the date string into a datetime object
+        article_date = datetime.strptime(article_date_str, "%a %b %d %H:%M:%S %Y")
+
+        # Convert to ISO 8601 format
+        article_date_iso = article_date.isoformat() + "Z"
+
+        entry = ET.SubElement(feed, "entry")
+
+        # Generate a unique ID for each article
+        entry_id = ET.SubElement(entry, "id")
+        entry_id.text = article_link
+
+        # Title can be derived from the article date
+        entry_title = ET.SubElement(entry, "title")
+        entry_title.text = f"Post from {article_date_str}"
+
+        # Link element for the article
+        entry_link = ET.SubElement(entry, "link", href=article_link)
+
+        # Updated date for the entry
+        entry_updated = ET.SubElement(entry, "updated")
+        entry_updated.text = article_date_iso
+
+        # Summary (content) of the article
+        summary = ET.SubElement(entry, "summary")
+        summary.text = article_content
+
+    # Convert the feed element to a string
+    feed_xml = ET.tostring(feed, encoding="unicode", method="xml")
+
+    return feed_xml, "", ""
 
 
 def sha256_hash(text):

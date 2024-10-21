@@ -75,4 +75,8 @@ After that, any text files that you create inside that folder will be published 
 ** `passthrough` will just copy the files from Dropbox to S3, without any processing.
 ** `flat_blog` will split the text files into individual posts, generate an `index.html` and a `styles.css` file for a blog.
 
+**Config for the 'flat_blog' file processor:**
 * `BLOG_TITLE` - the title used on the blog pages.
+* `FEED_URL` - the URL the blog will be published on.
+* `FEED_AUTHOR` (optional) - the name of the blog author.
+* `FEED_EMAIL` (optional) - the email of the blog author.

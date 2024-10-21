@@ -22,6 +22,9 @@ S3_PREFIX = os.environ.get("S3_PREFIX", "public/path/in/s3/")
 
 FILE_PROCESSOR = os.environ.get("FILE_PROCESSOR", "flat_blog")
 BLOG_TITLE = os.environ.get("BLOG_TITLE", "Blog")
+FEED_URL = os.environ.get("FEED_URL", "https://your-blog-address.com")
+FEED_AUTHOR = os.environ.get("FEED_AUTHOR")
+FEED_EMAIL = os.environ.get("FEED_EMAIL")
 
 if FILE_PROCESSOR not in VALID_FILE_PROCESSORS:
     raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
@@ -48,6 +51,7 @@ def ensure_slashes(path, start=True, end=True):
 
 DROPBOX_FOLDER_PATH = ensure_slashes(DROPBOX_FOLDER_PATH, start=True, end=False)
 S3_PREFIX = ensure_slashes(S3_PREFIX, start=False, end=False)
+FEED_URL = ensure_slashes(FEED_URL, start=False, end=False)
 
 s3_client = boto3.client("s3")
 
@@ -71,12 +75,18 @@ def lambda_handler(event, context):
         print("Invalid signature")
         return {"statusCode": 404, "body": "Not found"}
 
+    # gather config
+    config = {"blog_title": BLOG_TITLE, "feed_url": FEED_URL}
+    if FEED_AUTHOR:
+        config["feed_author"] = FEED_AUTHOR
+    if FEED_EMAIL:
+        config["feed_email"] = FEED_EMAIL
+
     # Step 1: Download the journal folder as a zip file from Dropbox
     zip_data = download_journal_zip()
 
     # Step 2: Extract and copy files to S3
     zip_files_iterator = unzip_files(io.BytesIO(zip_data))
-    config = {"blog_title": BLOG_TITLE}
     file_dict = file_processor.process_files(zip_files_iterator, config)
 
     # Step 4: Batch upload files to S3
