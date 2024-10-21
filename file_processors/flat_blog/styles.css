@@ -145,6 +145,49 @@ ul.tags li::before {
     border: 1px solid #3e4731;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
     border-radius: 8px;
+
+    max-height: 200px; /* Set max height to a typical tweet size */
+    overflow: hidden;
+    position: relative;
+}
+
+/* Add a fading effect at the bottom of the article */
+.post_list article::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(transparent, #272822); /* Fading effect */
+}
+
+/* More link at the bottom */
+.post_list article::before {
+    content: 'more...';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px;
+    color: #66d9ef;
+    background-color: #272822;
+    opacity: 0.9;
+    border-radius: 8pt;
+    font-size: 0.9em;
+    cursor: pointer;
+    z-index: 10; /* Ensure it's above the fade */
+}
+
+/* Remove the fade and "more..." when there is no overflow */
+.post_list article.no-overflow::after,
+.post_list article.no-overflow::before {
+    content: none; /* Remove fade and "more..." link */
+}
+
+/* Make the entire article clickable */
+.post_list article:hover {
+    cursor: pointer;
 }
 
 /* Footer */
@@ -170,5 +213,6 @@ footer {
 
     .post_list article {
         margin: 1.5em 0.75em;
+        max-height: 400px;
     }
 }

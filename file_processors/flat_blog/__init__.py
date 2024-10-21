@@ -149,6 +149,33 @@ def generate_index(file_dict):
 
     posts_html = "\n        ".join(post_list)
 
+    links_click_html = """
+    <script>
+        document.querySelectorAll('.post_list article').forEach(article => {
+            article.addEventListener('click', function() {
+                const postUrl = article.querySelector('.date a').getAttribute('href')
+                window.location.href = postUrl
+            });
+        });
+    </script>
+"""
+    format_entries_html = """
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.post_list article').forEach(article => {
+                const computedStyle = window.getComputedStyle(article);
+                const maxHeight = parseInt(computedStyle.maxHeight, 10) + 100;
+
+                // Check if content fits within the max height
+                if (article.scrollHeight <= maxHeight) {
+                    // Remove fade and "more..." link if not overflowing
+                    article.classList.add('no-overflow')
+                }
+            });
+        });
+    </script>
+"""
+
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,6 +189,10 @@ def generate_index(file_dict):
     <div class="post_list">
     {posts_html}
     </div>
+
+    {links_click_html}
+
+    {format_entries_html}
 </body>
 </html>
 """
