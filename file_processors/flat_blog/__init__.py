@@ -225,11 +225,15 @@ def generate_atom_feed(file_dict, config):
 
     # Link element
     feed_link = config.get("blog_url", "https://yourwebsite.com")
-    link = ET.SubElement(feed, "link", href=feed_link, rel="self")
+    link = ET.SubElement(feed, "link", href=f"{feed_link}/atom.xml", rel="self")
+
+    # Feed id
+    feed_id = ET.SubElement(feed, "id")
+    feed_id.text = feed_link
 
     # Updated element with the current time
     updated = ET.SubElement(feed, "updated")
-    updated.text = datetime.now(timezone.utc).isoformat() + "Z"
+    updated.text = datetime.now(timezone.utc).isoformat()
 
     # Author element
     if "blog_author" in config or "blog_email" in config:
