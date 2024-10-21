@@ -149,26 +149,25 @@ def generate_index(file_dict):
 
     posts_html = "\n        ".join(post_list)
 
-    links_click_html = """
-    <script>
-        document.querySelectorAll('.post_list article').forEach(article => {
-            article.addEventListener('click', function() {
-                const postUrl = article.querySelector('.date a').getAttribute('href')
-                window.location.href = postUrl
-                return false
-            });
-        });
-    </script>
-"""
     format_entries_html = """
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('.post_list article').forEach(article => {
-                const computedStyle = window.getComputedStyle(article);
-                const maxHeight = parseInt(computedStyle.maxHeight, 10) + 100;
+                const computedStyle = window.getComputedStyle(article)
+                const maxHeight = parseInt(computedStyle.maxHeight, 10) + 100
 
                 // Check if content fits within the max height
-                if (article.scrollHeight <= maxHeight) {
+                if (article.scrollHeight > maxHeight) {
+                    // Create a "more..." link
+                    const postUrl = article.querySelector('.date a').getAttribute('href')
+                    const moreLink = document.createElement('a')
+                    moreLink.textContent = 'more...'
+                    moreLink.href = postUrl
+                    moreLink.classList.add('more-link')
+
+                    // Append the "more..." link to the article
+                    article.appendChild(moreLink)
+                } else {
                     // Remove fade and "more..." link if not overflowing
                     article.classList.add('no-overflow')
                 }
@@ -190,8 +189,6 @@ def generate_index(file_dict):
     <div class="post_list">
     {posts_html}
     </div>
-
-    {links_click_html}
 
     {format_entries_html}
 </body>

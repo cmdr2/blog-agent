@@ -163,8 +163,7 @@ ul.tags li::before {
 }
 
 /* More link at the bottom */
-.post_list article::before {
-    content: 'more...';
+.more-link {
     position: absolute;
     bottom: 0;
     left: 50%;
@@ -172,22 +171,15 @@ ul.tags li::before {
     padding: 5px;
     color: #66d9ef;
     background-color: #272822;
-    opacity: 0.9;
-    border-radius: 8pt;
     font-size: 0.9em;
     cursor: pointer;
     z-index: 10; /* Ensure it's above the fade */
+    text-decoration: none; /* Remove underline */
 }
 
-/* Remove the fade and "more..." when there is no overflow */
-.post_list article.no-overflow::after,
-.post_list article.no-overflow::before {
-    content: none; /* Remove fade and "more..." link */
-}
-
-/* Make the entire article clickable */
-.post_list article:hover {
-    cursor: pointer;
+/* Remove the fade when there is no overflow */
+.post_list article.no-overflow::after {
+    content: none; /* Remove fade */
 }
 
 /* Footer */
