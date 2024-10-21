@@ -141,8 +141,8 @@ ul.tags li::before {
 
 /* Index */
 .post_list article {
-    border: 1px solid #33392a;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border: 1px solid #3e4731;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
     border-radius: 8px;
 }
 
