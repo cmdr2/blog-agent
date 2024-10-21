@@ -176,10 +176,12 @@ def upload_file(file_path, file_content):
     """
     mime_type = guess_type(file_path)[0]
 
-    print("uploading", S3_PREFIX + "/" + file_path, mime_type)
+    key = S3_PREFIX + "/" + file_path if S3_PREFIX else file_path
+
+    print("uploading", key, mime_type)
     s3_client.put_object(
         Bucket=S3_BUCKET,
-        Key=S3_PREFIX + "/" + file_path,
+        Key=key,
         Body=file_content.encode(),
         ContentType=mime_type,
         ACL="public-read",
