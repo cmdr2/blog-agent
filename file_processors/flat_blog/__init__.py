@@ -20,18 +20,18 @@ HEAD = """
 """
 
 
-def process_files(file_iterator):
+def process_files(file_iterator, config={}):
     file_dict = {}
     dir_name = os.path.dirname(__file__)
 
     # process the text files
     for filename, content in file_iterator:
-        files = process_file(filename, content)
+        files = process_file(filename, content, config)
         if files:
             file_dict.update(files)
 
     # include index.html
-    file_dict["index.html"] = generate_index(file_dict)
+    file_dict["index.html"] = generate_index(file_dict, config)
 
     # flatten the content
     file_dict = {k: v[0] for k, v in file_dict.items()}
@@ -46,7 +46,7 @@ def process_files(file_iterator):
     return file_dict
 
 
-def process_file(filename: str, file_contents: bytes) -> dict:
+def process_file(filename: str, file_contents: bytes, config: dict) -> dict:
     dir_path = os.path.dirname(filename)
     name = os.path.basename(filename)
     name, ext = os.path.splitext(name)
@@ -68,14 +68,14 @@ def process_file(filename: str, file_contents: bytes) -> dict:
     for i, post in enumerate(posts):
         post = post.strip()
         if post:
-            post_id, *data = process_post(post)
+            post_id, *data = process_post(post, config)
             key = f"{dir_path}/{year}/{month_int}/{post_id}.html"
             post_dict[key] = data
 
     return post_dict
 
 
-def process_post(post_contents: str) -> str:
+def process_post(post_contents: str, config) -> str:
     md_to_html = MarkdownToHtmlConverter()
 
     # Split post contents into lines
@@ -85,6 +85,7 @@ def process_post(post_contents: str) -> str:
     post_date = lines[0]
     tags = []
 
+    blog_title = config.get("blog_title", "Blog")
     post_id = sha256_hash(post_date)[:16]
 
     # Check for tags line
@@ -121,6 +122,9 @@ def process_post(post_contents: str) -> str:
     <link rel="stylesheet" href="../../../styles.css?v={t}">
 </head>
 <body>
+    <header>
+    <h1>{blog_title}</h1>
+    </header>
     <script>
         Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
     </script>
@@ -131,11 +135,12 @@ def process_post(post_contents: str) -> str:
     return post_id, html_content, article_html
 
 
-def generate_index(file_dict):
+def generate_index(file_dict, config):
     filenames = list(file_dict.keys())
     filenames.reverse()
 
     t = time.time()
+    blog_title = config.get("blog_title", "Blog")
 
     post_list = []
     for filename in filenames:
@@ -183,6 +188,9 @@ def generate_index(file_dict):
     <link rel="stylesheet" href="styles.css?v={t}">
 </head>
 <body>
+    <header>
+    <h1>{blog_title}</h1>
+    </header>
     <script>
         Prism.plugins.autoloader.languages_path = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
     </script>

@@ -12,10 +12,12 @@ body {
 header {
     background-color: #1e1f1c;
     color: #f92672;
-    padding: 1em;
-    text-align: center;
+    padding: 0.75em 1.2em;
     font-size: 1.5em;
     border-bottom: 1px solid #3e3d32;
+}
+header h1 {
+    margin: 0;
 }
 
 /* Links */
@@ -195,6 +197,10 @@ footer {
 @media (max-width: 600px) {
     html {
         font-size: 110%; /* Increase font size slightly for mobile devices */
+    }
+
+    header {
+        padding: 0.75em;
     }
 
     article:not(.post_list article) {

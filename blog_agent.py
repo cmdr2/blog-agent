@@ -21,6 +21,7 @@ DROPBOX_FOLDER_PATH = os.environ.get("DROPBOX_FOLDER_PATH", "/your-journal-folde
 S3_PREFIX = os.environ.get("S3_PREFIX", "public/path/in/s3/")
 
 FILE_PROCESSOR = os.environ.get("FILE_PROCESSOR", "flat_blog")
+BLOG_TITLE = os.environ.get("BLOG_TITLE", "Blog")
 
 if FILE_PROCESSOR not in VALID_FILE_PROCESSORS:
     raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
@@ -75,7 +76,8 @@ def lambda_handler(event, context):
 
     # Step 2: Extract and copy files to S3
     zip_files_iterator = unzip_files(io.BytesIO(zip_data))
-    file_dict = file_processor.process_files(zip_files_iterator)
+    config = {"blog_title": BLOG_TITLE}
+    file_dict = file_processor.process_files(zip_files_iterator, config)
 
     # Step 4: Batch upload files to S3
     batch_upload_to_s3(file_dict)
