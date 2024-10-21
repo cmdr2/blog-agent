@@ -232,16 +232,16 @@ def generate_atom_feed(file_dict, config):
     updated.text = datetime.now(timezone.utc).isoformat() + "Z"
 
     # Author element
-    if "feed_author" in config or "feed_email" in config:
+    if "blog_author" in config or "blog_email" in config:
         author = ET.SubElement(feed, "author")
 
-        if "feed_author" in config:
+        if "blog_author" in config:
             name = ET.SubElement(author, "name")
-            name.text = config["feed_author"]
+            name.text = config["blog_author"]
 
-        if "feed_email" in config:
+        if "blog_email" in config:
             email = ET.SubElement(author, "email")
-            email.text = config["feed_email"]
+            email.text = config["blog_email"]
 
     # Create entries for each article
     for filename, content in file_dict.items():

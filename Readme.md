@@ -78,5 +78,5 @@ After that, any text files that you create inside that folder will be published 
 **Config for the 'flat_blog' file processor:**
 * `BLOG_TITLE` - the title used on the blog pages.
 * `BLOG_URL` - the URL the blog will be published on.
-* `FEED_AUTHOR` (optional) - the name of the blog author.
-* `FEED_EMAIL` (optional) - the email of the blog author.
+* `BLOG_AUTHOR` (optional) - the name of the blog author.
+* `BLOG_EMAIL` (optional) - the email of the blog author.
