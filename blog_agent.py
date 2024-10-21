@@ -22,7 +22,7 @@ S3_PREFIX = os.environ.get("S3_PREFIX", "public/path/in/s3/")
 
 FILE_PROCESSOR = os.environ.get("FILE_PROCESSOR", "flat_blog")
 BLOG_TITLE = os.environ.get("BLOG_TITLE", "Blog")
-FEED_URL = os.environ.get("FEED_URL", "https://your-blog-address.com")
+BLOG_URL = os.environ.get("BLOG_URL", "https://your-blog-address.com")
 FEED_AUTHOR = os.environ.get("FEED_AUTHOR")
 FEED_EMAIL = os.environ.get("FEED_EMAIL")
 
@@ -51,7 +51,7 @@ def ensure_slashes(path, start=True, end=True):
 
 DROPBOX_FOLDER_PATH = ensure_slashes(DROPBOX_FOLDER_PATH, start=True, end=False)
 S3_PREFIX = ensure_slashes(S3_PREFIX, start=False, end=False)
-FEED_URL = ensure_slashes(FEED_URL, start=False, end=False)
+BLOG_URL = ensure_slashes(BLOG_URL, start=False, end=False)
 
 s3_client = boto3.client("s3")
 
@@ -76,7 +76,7 @@ def lambda_handler(event, context):
         return {"statusCode": 404, "body": "Not found"}
 
     # gather config
-    config = {"blog_title": BLOG_TITLE, "feed_url": FEED_URL}
+    config = {"blog_title": BLOG_TITLE, "blog_url": BLOG_URL}
     if FEED_AUTHOR:
         config["feed_author"] = FEED_AUTHOR
     if FEED_EMAIL:

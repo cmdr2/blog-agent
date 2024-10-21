@@ -224,7 +224,7 @@ def generate_atom_feed(file_dict, config):
     title.text = config.get("blog_title", "Your Feed Title")
 
     # Link element
-    feed_link = config.get("feed_url", "https://yourwebsite.com")
+    feed_link = config.get("blog_url", "https://yourwebsite.com")
     link = ET.SubElement(feed, "link", href=feed_link, rel="self")
 
     # Updated element with the current time
