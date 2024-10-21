@@ -367,7 +367,7 @@ def get_social_content(config):
             )
         if social_discord:
             social_links += f"""
-            <a href="#" class="discord-link" target="_blank" class="social-icon">
+            <a href="#" class="social-icon discord-link" target="_blank">
                 <i class="fab fa-discord"></i>
             </a>"""
 
