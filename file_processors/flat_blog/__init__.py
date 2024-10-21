@@ -24,43 +24,48 @@ HEAD = """
 
 
 def process_files(file_iterator, config={}):
-    file_dict = {}
+    file_list = []
     dir_name = os.path.dirname(__file__)
 
     # process the text files
     for filename, content in file_iterator:
         files = process_file(filename, content, config)
-        if files:
-            file_dict.update(files)
+        file_list += files
+
+    # sort by date
+    sort_by_date(file_list)
 
     # generate index.html and atom.xml
-    atom_xml = generate_atom_feed(file_dict, config)
-    index_html = generate_index(file_dict, config)
+    atom_xml = generate_atom_feed(file_list, config)
+    index_lists: list = generate_index(file_list, config)
 
     # include index.html and atom.xml
-    file_dict["index.html"] = index_html
-    file_dict["atom.xml"] = atom_xml
+    file_list.append(("atom.xml", atom_xml))
+
+    for i, list_html in enumerate(index_lists):
+        key = "index.html" if i == 0 else f"all_posts_{i}.html"
+        file_list.append((key, list_html))
 
     # flatten the content
-    file_dict = {k: v[0] for k, v in file_dict.items()}
+    file_list = [(k, v[0]) for k, v in file_list]
 
     # include styles.css
     styles_path = os.path.join(dir_name, "styles.css")
     with open(styles_path, "r") as f:
-        file_dict[f"styles.css"] = f.read()
+        file_list.append((f"styles.css", f.read()))
 
-    print(file_dict.keys())
+    print([k for k, _ in file_list])
 
-    return file_dict
+    return file_list
 
 
-def process_file(filename: str, file_contents: bytes, config: dict) -> dict:
+def process_file(filename: str, file_contents: bytes, config: dict) -> list:
     dir_path = os.path.dirname(filename)
     name = os.path.basename(filename)
     name, ext = os.path.splitext(name)
 
     if ext.lower() != ".txt":
-        return
+        return []
 
     file_contents = file_contents.decode()
 
@@ -71,16 +76,16 @@ def process_file(filename: str, file_contents: bytes, config: dict) -> dict:
     # Split file contents into posts
     posts = re.split(r"\n\s*--\s*\n", file_contents.strip())
 
-    # Create dictionary for posts
-    post_dict = {}
+    # Create list for posts
+    post_list = []
     for i, post in enumerate(posts):
         post = post.strip()
         if post:
             post_id, *data = process_post(post, config)
             key = f"{dir_path}/{year}/{month_int}/{post_id}.html"
-            post_dict[key] = data
+            post_list.append((key, data))
 
-    return post_dict
+    return post_list
 
 
 def process_post(post_contents: str, config) -> str:
@@ -156,17 +161,43 @@ def process_post(post_contents: str, config) -> str:
     return post_id, html_content, article_html, post_date
 
 
-def generate_index(file_dict, config):
-    filenames = list(file_dict.keys())
-    filenames.reverse()
+def sort_by_date(file_list):
+    file_list.sort(key=lambda x: datetime.strptime(x[1][2], "%a %b %d %H:%M:%S %Y"), reverse=True)
+    return file_list
 
+
+def generate_index(file_list, config):
     t = time.time()
+
+    index_lists = []
+
+    # paginate
+    posts_per_page = config.get("blog_posts_per_page", 50)
+    pages = list(paginate_list(file_list, posts_per_page))
+    num_pages = len(pages)
+    print(num_pages, len(file_list), posts_per_page)
+
+    for page_idx, page in enumerate(pages):
+        prev_page_idx = page_idx - 1 if page_idx > 0 else None
+        next_page_idx = page_idx + 1 if page_idx < num_pages - 1 else None
+
+        index_list = _do_generate_index(page, config, t, prev_page_idx, next_page_idx)
+        index_lists.append(index_list)
+
+    return index_lists
+
+
+def paginate_list(strings_list, N):
+    # Paginate the list into chunks of size N
+    for i in range(0, len(strings_list), N):
+        yield strings_list[i : i + N]
+
+
+def _do_generate_index(file_list, config, t, prev_page_idx, next_page_idx):
     blog_title = config.get("blog_title", "Blog")
 
     post_list = []
-    for filename in filenames:
-        # for filename, content in file_dict.items():
-        content = file_dict[filename]
+    for filename, content in file_list:
         article_html = content[1]
         article_html = article_html.replace('<time class="date">', f'<time class="date"><a href="{filename}">')
         article_html = article_html.replace("</time>", "</a></time>")
@@ -174,6 +205,16 @@ def generate_index(file_dict, config):
         post_list.append(f"{article_html}")
 
     posts_html = "\n        ".join(post_list)
+
+    pagination_html = ""
+    if prev_page_idx is not None or next_page_idx is not None:
+        pagination_html = '<div class="pagination">'
+        if prev_page_idx is not None:
+            link = "index.html" if prev_page_idx == 0 else f"all_posts_{prev_page_idx}.html"
+            pagination_html += f'<a href="{link}" class="prev-link"><i class="fas fa-arrow-left"></i> Previous</a>'
+        if next_page_idx is not None:
+            pagination_html += f'<a href="all_posts_{next_page_idx}.html" class="next-link">Next <i class="fas fa-arrow-right"></i></a>'
+        pagination_html += "</div>"
 
     format_entries_html = """
     <script>
@@ -231,6 +272,8 @@ def generate_index(file_dict, config):
 
     {format_entries_html}
 
+    {pagination_html}
+
     {social_footer}
 
     {social_script_tag}
@@ -241,7 +284,7 @@ def generate_index(file_dict, config):
     return html_content, "", ""
 
 
-def generate_atom_feed(file_dict, config):
+def generate_atom_feed(file_list, config):
     # Create the root feed element
     feed = ET.Element("feed", xmlns="http://www.w3.org/2005/Atom")
 
@@ -273,8 +316,12 @@ def generate_atom_feed(file_dict, config):
             email = ET.SubElement(author, "email")
             email.text = config["blog_email"]
 
+    # pick the latest N posts
+    posts_per_page = config.get("blog_posts_per_page", 50)
+    file_list = file_list[:posts_per_page]
+
     # Create entries for each article
-    for filename, content in file_dict.items():
+    for filename, content in file_list:
         _, article_content, article_date_str = content
         article_link = feed_link + "/" + filename
 

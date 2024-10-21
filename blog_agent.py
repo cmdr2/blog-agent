@@ -28,6 +28,7 @@ BLOG_EMAIL = os.environ.get("BLOG_EMAIL")
 SOCIAL_GITHUB_USERNAME = os.environ.get("SOCIAL_GITHUB_USERNAME")
 SOCIAL_X_USERNAME = os.environ.get("SOCIAL_X_USERNAME")
 SOCIAL_DISCORD_USERNAME = os.environ.get("SOCIAL_DISCORD_USERNAME")
+BLOG_POSTS_PER_PAGE = os.environ.get("BLOG_POSTS_PER_PAGE", 50)
 
 if FILE_PROCESSOR not in VALID_FILE_PROCESSORS:
     raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
@@ -96,10 +97,10 @@ def lambda_handler(event, context):
 
     # Step 2: Extract and copy files to S3
     zip_files_iterator = unzip_files(io.BytesIO(zip_data))
-    file_dict = file_processor.process_files(zip_files_iterator, config)
+    file_list = file_processor.process_files(zip_files_iterator, config)
 
     # Step 4: Batch upload files to S3
-    batch_upload_to_s3(file_dict)
+    batch_upload_to_s3(file_list)
 
     return {"statusCode": 200, "body": "Publish successful!"}
 
@@ -152,15 +153,15 @@ def unzip_files(zip_path):
                 yield file_info.filename, file.read()
 
 
-def batch_upload_to_s3(file_dict):
+def batch_upload_to_s3(file_list):
     """
     Uploads all files to S3 in a batch operation using threading for concurrent uploads.
-    - file_dict: A dictionary where keys are S3 file paths and values are file contents.
+    - file_list: A list of tuples - (S3 file path, file contents)
     """
 
     threads = []
 
-    for path, content in file_dict.items():
+    for path, content in file_list:
         t = threading.Thread(target=upload_file, args=(path, content))
         t.start()
         threads.append(t)

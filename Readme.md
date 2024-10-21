@@ -80,6 +80,7 @@ After that, any text files that you create inside that folder will be published 
 * `BLOG_URL` - the URL the blog will be published on.
 * `BLOG_AUTHOR` (optional) - the name of the blog author.
 * `BLOG_EMAIL` (optional) - the email of the blog author.
+* `BLOG_POSTS_PER_PAGE` (optional, default 50) - the number of posts to show per page (and in `atom.xml`).
 * `SOCIAL_GITHUB_USERNAME` (optional) - Github username of the blog author.
 * `SOCIAL_X_USERNAME` (optional) - X (twitter) username of the blog author.
 * `SOCIAL_DISCORD_USERNAME` (optional) - Discord username of the blog author.

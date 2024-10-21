@@ -2,9 +2,9 @@
 
 
 def process_files(file_iterator, config={}):
-    file_dict = {}
+    file_list = {}
 
     for filename, content in file_iterator:
-        file_dict[filename] = content
+        file_list.append((filename, content))
 
-    return file_dict
+    return file_list

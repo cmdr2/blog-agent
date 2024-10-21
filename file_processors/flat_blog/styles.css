@@ -209,6 +209,33 @@ footer {
     border-top: 1px solid #3e3d32;
 }
 
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center; /* Center the buttons */
+    align-items: center;
+    gap: 20px; /* Add space between the "Previous" and "Next" buttons */
+    margin: 20px 0;
+}
+
+.prev-link, .next-link {
+    font-size: 1em;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.prev-link i, .next-link i {
+    margin-right: 8px; /* Space between icon and text */
+}
+
+.next-link i {
+    margin-right: 0;
+    margin-left: 8px; /* Space on the left for the right arrow icon */
+}
+
 @media (max-width: 600px) {
     html {
         font-size: 110%; /* Increase font size slightly for mobile devices */
