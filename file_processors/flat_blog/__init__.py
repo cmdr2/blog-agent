@@ -187,7 +187,7 @@ def generate_index(file_dict, config):
                     // Create a "more..." link
                     const postUrl = article.querySelector('.date a').getAttribute('href')
                     const moreLink = document.createElement('a')
-                    moreLink.textContent = 'more...'
+                    moreLink.textContent = 'read more...'
                     moreLink.href = postUrl
                     moreLink.classList.add('more-link')
 
