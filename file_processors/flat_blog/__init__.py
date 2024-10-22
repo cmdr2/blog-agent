@@ -221,7 +221,7 @@ def _do_generate_index(file_list, config, t, prev_page_idx, next_page_idx):
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('.post_list article').forEach(article => {
                 const computedStyle = window.getComputedStyle(article)
-                const maxHeight = parseInt(computedStyle.maxHeight, 10) + 100
+                const maxHeight = parseInt(computedStyle.maxHeight, 10) + 70
 
                 // Check if content fits within the max height
                 if (article.scrollHeight > maxHeight) {
