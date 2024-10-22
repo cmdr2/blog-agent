@@ -175,7 +175,6 @@ def generate_index(file_list, config):
     posts_per_page = config.get("blog_posts_per_page", 50)
     pages = list(paginate_list(file_list, posts_per_page))
     num_pages = len(pages)
-    print(num_pages, len(file_list), posts_per_page)
 
     for page_idx, page in enumerate(pages):
         prev_page_idx = page_idx - 1 if page_idx > 0 else None
