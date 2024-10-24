@@ -5,7 +5,11 @@ from file_processors.flat_blog import process_files
 base_dir = "~/Dropbox/Apps/journal-public/"
 base_dir = os.path.expanduser(base_dir)
 
-files = ["notes/October 2024.txt", "notes/August 2024.txt"]
+files = []
+for file in os.listdir(base_dir + "/notes"):
+    if file.lower().endswith(".txt"):
+        files.append(f"notes/{file}")
+
 files_iterator = []
 for file in files:
     with open(base_dir + "/" + file, "rb") as f:
