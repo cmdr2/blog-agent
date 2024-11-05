@@ -82,7 +82,7 @@ def process_file(filename: str, file_contents: bytes, config: dict) -> list:
         post = post.strip()
         if post:
             post_id, *data = process_post(post, config)
-            key = f"{dir_path}/{year}/{month_int}/{post_id}.html"
+            key = f"{dir_path}/{year}/{month_int}/{post_id}/index.html"
             post_list.append((key, data))
 
     return post_list
@@ -99,7 +99,8 @@ def process_post(post_contents: str, config) -> str:
     tags = []
 
     blog_title = config.get("blog_title", "Blog")
-    post_id = sha256_hash(post_date)[:16]
+    post_time = datetime.strptime(post_date, "%a %b %d %H:%M:%S %Y")
+    post_id = int(post_time.timestamp())
 
     # Check for tags line
     if len(lines) > 2 and lines[2].startswith("#"):
@@ -138,13 +139,13 @@ def process_post(post_contents: str, config) -> str:
 <html lang="en">
 <head>
 {HEAD}
-    <link rel="stylesheet" href="../../../styles.css?v={t}">
+    <link rel="stylesheet" href="../../../../styles.css?v={t}">
     <link rel="alternate" type="application/atom+xml" href="../../../atom.xml" title="Your Blog Title">
 </head>
 <body>
     <header>
         <h1>
-            <a href="../../../index.html">{blog_title}</a>{social_links}
+            <a href="../../../../">{blog_title}</a>{social_links}
         </h1>
     </header>
     <script>
@@ -198,7 +199,12 @@ def _do_generate_index(file_list, config, t, prev_page_idx, next_page_idx):
     post_list = []
     for filename, content in file_list:
         article_html = content[1]
-        article_html = article_html.replace('<time class="date">', f'<time class="date"><a href="{filename}">')
+        if filename.endswith("index.html") and not filename.startswith("index"):
+            post_link = filename[: -len("index.html")]
+        else:
+            post_link = filename
+
+        article_html = article_html.replace('<time class="date">', f'<time class="date"><a href="{post_link}">')
         article_html = article_html.replace("</time>", "</a></time>")
 
         post_list.append(f"{article_html}")
