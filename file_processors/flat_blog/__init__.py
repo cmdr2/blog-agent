@@ -245,8 +245,11 @@ def _do_generate_index(file_list, config, t, prev_page_idx, next_page_idx):
     # social
     social_links, social_footer, social_script_tag = get_social_content(config)
 
+    footer = '<footer>Powered by <a href="https://github.com/cmdr2/blog-agent" target="_blank">blog-agent</a>'
     if social_footer:
-        social_footer = "<footer>" + social_footer + "</footer>"
+        footer = f"{footer}<br/><br/>{social_footer}"
+
+    footer += "</footer>"
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -273,7 +276,7 @@ def _do_generate_index(file_list, config, t, prev_page_idx, next_page_idx):
 
     {pagination_html}
 
-    {social_footer}
+    {footer}
 
     {social_script_tag}
 </body>
