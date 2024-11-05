@@ -12,6 +12,7 @@ from hashlib import sha256
 import hmac
 
 VALID_FILE_PROCESSORS = ("flat_blog", "passthrough")
+FILE_INDEX_PATH = ".dropbox_index.json"
 
 S3_BUCKET = os.environ.get("S3_BUCKET", "your-s3-bucket-name")
 DROPBOX_REFRESH_TOKEN = os.environ.get("DROPBOX_REFRESH_TOKEN", "your-dropbox-refresh-token")
@@ -34,6 +35,8 @@ if FILE_PROCESSOR not in VALID_FILE_PROCESSORS:
     raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
 
 file_processor = importlib.import_module("file_processors." + FILE_PROCESSOR)
+
+file_index = {}  # populated from S3
 
 
 def ensure_slashes(path, start=True, end=True):
@@ -61,6 +64,8 @@ s3_client = boto3.client("s3")
 
 
 def lambda_handler(event, context):
+    global file_index
+
     httpMethod = event["requestContext"]["http"]["method"]
     queryParams = event.get("queryStringParameters", {})
     # Check for Dropbox challenge verification request
@@ -92,14 +97,21 @@ def lambda_handler(event, context):
     if SOCIAL_X_USERNAME:
         config["social_x_username"] = SOCIAL_X_USERNAME
 
-    # Step 1: Download the journal folder as a zip file from Dropbox
+    # Step 1: Get the file index from S3
+    # file_index = get_json_file(FILE_INDEX_PATH)
+
+    # Step 2: Download the journal folder as a zip file from Dropbox
     zip_data = download_journal_zip()
 
-    # Step 2: Extract and copy files to S3
+    # Step 3: Extract and copy files to S3
     zip_files_iterator = unzip_files(io.BytesIO(zip_data))
     file_list = file_processor.process_files(zip_files_iterator, config)
 
-    # Step 4: Batch upload files to S3
+    # Step 4: Set the new file_index
+    # file_index_entry = (FILE_INDEX_PATH, json.dumps(file_index))
+    # file_list.append(file_index_entry)
+
+    # Step 5: Batch upload files to S3
     batch_upload_to_s3(file_list)
 
     return {"statusCode": 200, "body": "Publish successful!"}
@@ -149,8 +161,20 @@ def refresh_access_token():
 def unzip_files(zip_path):
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
         for file_info in zip_ref.infolist():
-            with zip_ref.open(file_info) as file:
-                yield file_info.filename, file.read()
+            file_name = file_info.filename
+
+            # Read the modified timestamp as a tuple
+            file_modified_time = file_info.date_time
+
+            # Check if the file is in the file_index and its modified time
+            last_modified = file_index.get(file_name)
+
+            if last_modified is None or file_modified_time > tuple(last_modified):
+                with zip_ref.open(file_info) as file:
+                    yield file_name, file.read()
+
+                # Update the file_index with the new modified time
+                file_index[file_name] = file_modified_time
 
 
 def batch_upload_to_s3(file_list):
@@ -187,3 +211,16 @@ def upload_file(file_path, file_content):
         ACL="public-read",
     )
     print("uploaded", file_path)
+
+
+def get_json_file(file_path):
+    key = S3_PREFIX + "/" + file_path if S3_PREFIX else file_path
+
+    try:
+        print("fetching", key)
+        response = s3_client.get_object(Bucket=S3_BUCKET, Key=key)
+        data = response["Body"].read()
+        return json.loads(data)
+    except Exception as e:
+        print(f"Error fetching JSON from S3: {e}")
+        return {}
