@@ -19,7 +19,6 @@ HEAD = """
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <title>Post</title>
 """
 
 
@@ -139,8 +138,9 @@ def process_post(post_contents: str, config) -> str:
 <html lang="en">
 <head>
 {HEAD}
+    <title>{blog_title}</title>
     <link rel="stylesheet" href="../../../../styles.css?v={t}">
-    <link rel="alternate" type="application/atom+xml" href="../../../atom.xml" title="Your Blog Title">
+    <link rel="alternate" type="application/atom+xml" href="../../../atom.xml" title="{blog_title}">
 </head>
 <body>
     <header>
@@ -261,8 +261,9 @@ def _do_generate_index(file_list, config, t, prev_page_idx, next_page_idx):
 <html lang="en">
 <head>
 {HEAD}
+    <title>{blog_title}</title>
     <link rel="stylesheet" href="styles.css?v={t}">
-    <link rel="alternate" type="application/atom+xml" href="atom.xml" title="Your Blog Title">
+    <link rel="alternate" type="application/atom+xml" href="atom.xml" title="{blog_title}">
 </head>
 <body>
     <header>
