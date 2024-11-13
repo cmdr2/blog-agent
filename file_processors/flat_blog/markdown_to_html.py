@@ -10,6 +10,7 @@ class MarkdownToHtmlConverter:
         self.header_pattern = re.compile(r"^(#{1,6})\s*(.+)", re.MULTILINE)
         self.bold_pattern = re.compile(r"\*\*(.+?)\*\*")
         self.italic_pattern = re.compile(r"\*(.+?)\*")
+        self.strikethrough_pattern = re.compile(r"\~\~(.+?)\~\~")
         self.link_pattern = re.compile(r"\[(.+?)\]\((.+?)\)")
         self.list_pattern = re.compile(r"^\*\s+(.+)", re.MULTILINE)
         self.table_pattern = re.compile(r"^\|(.+?)\|\n\|(?:\s*:?-+:?\s*\|)+\n((?:\|.+?\|\n)+)", re.MULTILINE)
@@ -32,6 +33,9 @@ class MarkdownToHtmlConverter:
 
         # Handle italic text
         html = self.italic_pattern.sub(r"<em>\1</em>", html)
+
+        # Handle strikethrough text
+        html = self.strikethrough_pattern.sub(r"<del>\1</del>", html)
 
         # Handle links
         html = self.link_pattern.sub(r'<a href="\2">\1</a>', html)
