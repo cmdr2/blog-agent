@@ -1,6 +1,6 @@
 /* Base settings */
 body {
-    background-color: #292b24;
+    background-color: #1f2021;
     color: #f8f8f2;
     font-family: 'Fira Code', 'Consolas', 'Courier New', monospace;
     line-height: 1.6;
@@ -20,6 +20,7 @@ header {
 }
 header h1 {
     margin: 0;
+    color: #a6e22e;
 }
 header h1 a {
     color: #a6e22e;
@@ -47,7 +48,7 @@ a:hover {
 
 /* Blog post titles */
 h1, h2, h3, h4, h5, h6 {
-    color: #a6e22e;
+    color: #0fb0e1;
     margin-top: 1em;
     margin-bottom: 0.5em;
 }
@@ -92,7 +93,7 @@ blockquote {
 
 /* Code blocks */
 pre, code {
-    background-color: #1e1e1b !important; /* Force background color */
+    background-color: #0e0e0e !important; /* Force background color */
     color: #f8f8f2;
     padding: 0; /* Remove padding */
     border-radius: 8px !important; /* Rounded corners */
@@ -159,7 +160,7 @@ ul.tags li::before {
 
 /* Index */
 .post_list article {
-    border: 1px solid #3e4731;
+    border: 1px solid #272c31;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
     border-radius: 8px;
 
@@ -176,7 +177,7 @@ ul.tags li::before {
     left: 0;
     right: 0;
     height: 60px;
-    background: linear-gradient(transparent, #272822); /* Fading effect */
+    background: linear-gradient(transparent, #1f2021); /* Fading effect */
 }
 
 /* More link at the bottom */
@@ -187,7 +188,7 @@ ul.tags li::before {
     transform: translateX(-50%);
     padding: 5px;
     color: #66d9ef;
-    background-color: #272822;
+    background-color: #1f2021;
     font-size: 0.9em;
     cursor: pointer;
     z-index: 10; /* Ensure it's above the fade */
