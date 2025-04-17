@@ -160,7 +160,7 @@ ul.tags li::before {
 
 /* Index */
 .post_list article {
-    border: 1px solid #272c31;
+    border: 1px solid #2c363f;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
     border-radius: 8px;
 
