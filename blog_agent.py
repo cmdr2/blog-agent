@@ -174,7 +174,7 @@ def unzip_files(zip_path):
                     yield file_name, file.read()
 
                 # Update the file_index with the new modified time
-                file_index[file_name] = file_modified_time
+                # file_index[file_name] = file_modified_time
 
 
 def batch_upload_to_s3(file_list):
