@@ -83,20 +83,36 @@ class MarkdownToHtmlConverter:
         lines = text.split("\n")
         result = []
         in_ol = False
+        ol_items = []
+        start_index = None
+
         for line in lines:
             match = self.ol_list_pattern.match(line)
             if match:
+                number = int(line.split(".")[0])  # Extract the starting number
                 if not in_ol:
-                    result.append("<ol>")
                     in_ol = True
-                result.append(f"<li>{match.group(1)}</li>")
+                    start_index = number
+                    ol_items = []
+                ol_items.append(f"<li>{match.group(1)}</li>")
             else:
                 if in_ol:
+                    start_attr = f' start="{start_index}"' if start_index != 1 else ""
+                    result.append(f"<ol{start_attr}>")
+                    result.extend(ol_items)
                     result.append("</ol>")
                     in_ol = False
+                    ol_items = []
+                    start_index = None
                 result.append(line)
+
+        # Close any remaining list at the end
         if in_ol:
+            start_attr = f' start="{start_index}"' if start_index != 1 else ""
+            result.append(f"<ol{start_attr}>")
+            result.extend(ol_items)
             result.append("</ol>")
+
         return "\n".join(result)
 
     def _replace_unordered_lists(self, text: str) -> str:
