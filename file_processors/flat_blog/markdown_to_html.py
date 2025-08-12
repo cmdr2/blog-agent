@@ -24,7 +24,7 @@ class MarkdownToHtmlConverter:
         html = self.code_block_pattern.sub(self._extract_code_block, html)
 
         # Process headers
-        # html = self.header_pattern.sub(self._replace_header, html)
+        html = self.header_pattern.sub(self._replace_header, html)
 
         # Handle inline code
         html = self.inline_code_pattern.sub(lambda m: f"<code>{self._escape_html(m.group(1))}</code>", html)
