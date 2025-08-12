@@ -7,7 +7,7 @@ class MarkdownToHtmlConverter:
         # Updated regex patterns to handle code blocks properly, including '+' in language names
         self.code_block_pattern = re.compile(r"```([\w+]+)?\n(.*?)```", re.DOTALL)
         self.inline_code_pattern = re.compile(r"`([^`]+)`")
-        self.header_pattern = re.compile(r"^(#{1,6})\s*(.+)", re.MULTILINE)
+        self.header_pattern = re.compile(r"^(#{1,6})\s+(.+)", re.MULTILINE)
         self.bold_pattern = re.compile(r"\*\*(.+?)\*\*")
         self.italic_pattern = re.compile(r"\*(.+?)\*")
         self.strikethrough_pattern = re.compile(r"\~\~(.+?)\~\~")
