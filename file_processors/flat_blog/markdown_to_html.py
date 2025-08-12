@@ -12,7 +12,8 @@ class MarkdownToHtmlConverter:
         self.italic_pattern = re.compile(r"\*(.+?)\*")
         self.strikethrough_pattern = re.compile(r"\~\~(.+?)\~\~")
         self.link_pattern = re.compile(r"\[(.+?)\]\((.+?)\)")
-        self.list_pattern = re.compile(r"^\*\s+(.+)", re.MULTILINE)
+        self.ul_list_pattern = re.compile(r"^[-*]\s+(.+)", re.MULTILINE)
+        self.ol_list_pattern = re.compile(r"^\d+\.\s+(.+)", re.MULTILINE)
         self.table_pattern = re.compile(r"^\|(.+?)\|\n\|(?:\s*:?-+:?\s*\|)+\n((?:\|.+?\|\n)+)", re.MULTILINE)
         self.code_blocks = {}
 
@@ -23,10 +24,10 @@ class MarkdownToHtmlConverter:
         html = self.code_block_pattern.sub(self._extract_code_block, html)
 
         # Process headers
-        html = self.header_pattern.sub(self._replace_header, html)
+        # html = self.header_pattern.sub(self._replace_header, html)
 
         # Handle inline code
-        html = self.inline_code_pattern.sub(r"<code>\1</code>", html)
+        html = self.inline_code_pattern.sub(lambda m: f"<code>{self._escape_html(m.group(1))}</code>", html)
 
         # Handle bold text
         html = self.bold_pattern.sub(r"<strong>\1</strong>", html)
@@ -41,7 +42,10 @@ class MarkdownToHtmlConverter:
         html = self.link_pattern.sub(r'<a href="\2">\1</a>', html)
 
         # Handle unordered lists
-        html = self.list_pattern.sub(self._replace_list, html)
+        html = self._replace_unordered_lists(html)
+
+        # Handle ordered lists
+        html = self._replace_ordered_lists(html)
 
         # Handle tables
         html = self.table_pattern.sub(self._replace_table, html)
@@ -68,15 +72,52 @@ class MarkdownToHtmlConverter:
     def _wrap_code_block(self, language: str, code: str) -> str:
         # Escape HTML characters in the code
         escaped_code = self._escape_html(code)
-        return f'<pre><code class="language-{language}">{escaped_code}</code></pre>'
+        return f'<pre><code class="codeblock language-{language}">{escaped_code}</code></pre>'
 
     def _replace_header(self, match):
         header_level = len(match.group(1))
         content = match.group(2)
         return f"<h{header_level}>{content}</h{header_level}>"
 
-    def _replace_list(self, match):
-        return f"<li>{match.group(1)}</li>"
+    def _replace_ordered_lists(self, text: str) -> str:
+        lines = text.split("\n")
+        result = []
+        in_ol = False
+        for line in lines:
+            match = self.ol_list_pattern.match(line)
+            if match:
+                if not in_ol:
+                    result.append("<ol>")
+                    in_ol = True
+                result.append(f"<li>{match.group(1)}</li>")
+            else:
+                if in_ol:
+                    result.append("</ol>")
+                    in_ol = False
+                result.append(line)
+        if in_ol:
+            result.append("</ol>")
+        return "\n".join(result)
+
+    def _replace_unordered_lists(self, text: str) -> str:
+        lines = text.split("\n")
+        result = []
+        in_ul = False
+        for line in lines:
+            match = self.ul_list_pattern.match(line)
+            if match:
+                if not in_ul:
+                    result.append("<ul>")
+                    in_ul = True
+                result.append(f"<li>{match.group(1)}</li>")
+            else:
+                if in_ul:
+                    result.append("</ul>")
+                    in_ul = False
+                result.append(line)
+        if in_ul:
+            result.append("</ul>")
+        return "\n".join(result)
 
     def _replace_table(self, match):
         headers = match.group(1).strip().split("|")
