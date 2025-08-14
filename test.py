@@ -1,5 +1,7 @@
 import os
 
+os.environ["IS_LOCAL_TEST"] = "1"
+
 from blog_agent import get_file_list
 
 base_dir = "~/Dropbox/Apps/journal-public/"

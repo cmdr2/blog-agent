@@ -3,7 +3,6 @@ import json
 import http.client
 import zipfile
 import io
-import boto3
 import importlib
 import threading
 from mimetypes import guess_type
@@ -60,7 +59,11 @@ DROPBOX_FOLDER_PATH = ensure_slashes(DROPBOX_FOLDER_PATH, start=True, end=False)
 S3_PREFIX = ensure_slashes(S3_PREFIX, start=False, end=False)
 BLOG_URL = ensure_slashes(BLOG_URL, start=False, end=False)
 
-s3_client = boto3.client("s3")
+s3_client = None
+if "IS_LOCAL_TEST" not in os.environ:
+    import boto3
+
+    s3_client = boto3.client("s3")
 
 
 def lambda_handler(event, context):
