@@ -1,6 +1,6 @@
 import os
 
-from file_processors.flat_blog import process_files
+from blog_agent import get_file_list
 
 base_dir = "~/Dropbox/Apps/journal-public/"
 base_dir = os.path.expanduser(base_dir)
@@ -23,10 +23,10 @@ config = {
     "social_github_username": "cmdr2",
     "social_discord_username": "cmdr2",
     "social_x_username": "cmdr2",
-    "blog_posts_per_page": 50,
+    "blog_posts_per_page": 10,
 }
 
-d = process_files(files_iterator, config)
+d = get_file_list(files_iterator, config)
 
 for file_path, content in d:
     out_path = f"tmp/{file_path}"

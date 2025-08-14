@@ -3,7 +3,6 @@ import json
 import http.client
 import zipfile
 import io
-import boto3
 import importlib
 import threading
 from mimetypes import guess_type
@@ -60,7 +59,7 @@ DROPBOX_FOLDER_PATH = ensure_slashes(DROPBOX_FOLDER_PATH, start=True, end=False)
 S3_PREFIX = ensure_slashes(S3_PREFIX, start=False, end=False)
 BLOG_URL = ensure_slashes(BLOG_URL, start=False, end=False)
 
-s3_client = boto3.client("s3")
+s3_client = None
 
 
 def lambda_handler(event, context):
@@ -208,12 +207,19 @@ def batch_upload_to_s3(file_list):
 
 
 def upload_file(file_path, file_content):
+    global s3_client
+
     """
     Upload a single file to S3.
     """
     mime_type = guess_type(file_path)[0]
 
     key = S3_PREFIX + "/" + file_path if S3_PREFIX else file_path
+
+    if s3_client is None:
+        import boto3
+
+        s3_client = boto3.client("s3")
 
     print("uploading", key, mime_type)
     s3_client.put_object(
