@@ -82,6 +82,12 @@ p {
     width: 100%; /* Ensure paragraphs take full width */
     font-size: 11pt; /* Set font size for paragraphs */
 }
+article ul,
+article ol {
+    font-size: 11pt;
+    margin: 0;
+    padding-left: 13pt;
+}
 
 /* Blockquotes */
 blockquote {
@@ -127,10 +133,6 @@ p code {
 ul, ol {
     margin-left: 2em;
     margin-bottom: 1.5em;
-}
-
-li {
-    color: #a6e22e;
 }
 
 /* Time element styling */
