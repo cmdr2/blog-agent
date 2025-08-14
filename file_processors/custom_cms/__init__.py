@@ -26,8 +26,6 @@ def process_files(files, config={}):
     file_list = []
     dir_name = os.path.dirname(__file__)
 
-    print(files[0])
-
     # process the blog posts
     file_list = [process_file(filename, data, config) for filename, data in files]
 
