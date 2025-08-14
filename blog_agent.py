@@ -208,8 +208,6 @@ def batch_upload_to_s3(file_list):
 
 
 def upload_file(file_path, file_content):
-    global s3_client
-
     """
     Upload a single file to S3.
     """
