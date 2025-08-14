@@ -11,7 +11,7 @@ from mimetypes import guess_type
 from hashlib import sha256
 import hmac
 
-VALID_FILE_PROCESSORS = ("flat_blog", "passthrough")
+VALID_FILE_PROCESSORS = ("blog", "custom_cms", "passthrough")
 FILE_INDEX_PATH = ".dropbox_index.json"
 
 S3_BUCKET = os.environ.get("S3_BUCKET", "your-s3-bucket-name")
@@ -21,7 +21,7 @@ DROPBOX_APP_SECRET = os.environ.get("DROPBOX_APP_SECRET", "your-dropbox-app-secr
 DROPBOX_FOLDER_PATH = os.environ.get("DROPBOX_FOLDER_PATH", "/your-journal-folder-in-dropbox/")
 S3_PREFIX = os.environ.get("S3_PREFIX", "public/path/in/s3/")
 
-FILE_PROCESSOR = os.environ.get("FILE_PROCESSOR", "flat_blog")
+FILE_PROCESSORS = os.environ.get("FILE_PROCESSORS", "blog,custom_cms").split(",")
 BLOG_TITLE = os.environ.get("BLOG_TITLE", "Blog")
 BLOG_URL = os.environ.get("BLOG_URL", "https://your-blog-address.com")
 BLOG_AUTHOR = os.environ.get("BLOG_AUTHOR")
@@ -31,10 +31,10 @@ SOCIAL_X_USERNAME = os.environ.get("SOCIAL_X_USERNAME")
 SOCIAL_DISCORD_USERNAME = os.environ.get("SOCIAL_DISCORD_USERNAME")
 BLOG_POSTS_PER_PAGE = int(os.environ.get("BLOG_POSTS_PER_PAGE", 20))
 
-if FILE_PROCESSOR not in VALID_FILE_PROCESSORS:
+if set(FILE_PROCESSORS).difference(VALID_FILE_PROCESSORS):
     raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
 
-file_processor = importlib.import_module("file_processors." + FILE_PROCESSOR)
+file_processors = [importlib.import_module("file_processors." + p) for p in FILE_PROCESSORS]
 
 file_index = {}  # populated from S3
 
@@ -105,7 +105,7 @@ def lambda_handler(event, context):
 
     # Step 3: Extract and copy files to S3
     zip_files_iterator = unzip_files(io.BytesIO(zip_data))
-    file_list = file_processor.process_files(zip_files_iterator, config)
+    file_list = get_file_list(zip_files_iterator, config)
 
     # Step 4: Set the new file_index
     # file_index_entry = (FILE_INDEX_PATH, json.dumps(file_index))
@@ -115,6 +115,19 @@ def lambda_handler(event, context):
     batch_upload_to_s3(file_list)
 
     return {"statusCode": 200, "body": "Publish successful!"}
+
+
+def get_file_list(files_iterator, config={}):
+    file_list = []
+
+    for filename, content in files_iterator:
+        file_list.append((filename, content))
+
+    for file_processor in file_processors:
+        print(file_processor)
+        file_list = file_processor.process_files(file_list, config)
+
+    return file_list
 
 
 def download_journal_zip():

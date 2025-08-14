@@ -22,14 +22,14 @@ HEAD = """
 """
 
 
-def process_files(file_iterator, config={}):
+def process_files(files, config={}):
     file_list = []
     dir_name = os.path.dirname(__file__)
 
-    # process the text files
-    for filename, content in file_iterator:
-        files = process_file(filename, content, config)
-        file_list += files
+    print(files[0])
+
+    # process the blog posts
+    file_list = [process_file(filename, data, config) for filename, data in files]
 
     # sort by date
     sort_by_date(file_list)
@@ -58,56 +58,18 @@ def process_files(file_iterator, config={}):
     return file_list
 
 
-def process_file(filename: str, file_contents: bytes, config: dict) -> list:
-    dir_path = os.path.dirname(filename)
-    name = os.path.basename(filename)
-    name, ext = os.path.splitext(name)
+def process_file(filename: str, data: tuple, config: dict) -> list:
+    post_time, tags, post_body = data
+    post_blocks = process_post(post_time, tags, post_body, config)
 
-    if ext.lower() != ".txt":
-        return []
-
-    file_contents = file_contents.decode()
-
-    # Extract month and year from the filename
-    month_name, year = name.split(" ")
-    month_int = f"{['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].index(month_name[:3]) + 1:02}"
-
-    # Split file contents into posts
-    posts = re.split(r"\n\s*--\s*\n", file_contents.strip())
-
-    # Create list for posts
-    post_list = []
-    for i, post in enumerate(posts):
-        post = post.strip()
-        if post:
-            post_id, *data = process_post(post, config)
-            key = f"{dir_path}/{year}/{month_int}/{post_id}/index.html"
-            post_list.append((key, data))
-
-    return post_list
+    return f"{filename}/index.html", post_blocks
 
 
-def process_post(post_contents: str, config) -> str:
+def process_post(post_time, tags, post_body, config) -> str:
     md_to_html = MarkdownToHtmlConverter()
 
-    # Split post contents into lines
-    lines = post_contents.strip().splitlines()
-
-    # Extract date and initialize variables
-    post_date = lines[0]
-    tags = []
-
     blog_title = config.get("blog_title", "Blog")
-    post_time = datetime.strptime(post_date, "%a %b %d %H:%M:%S %Y")
-    post_id = int(post_time.timestamp())
-
-    # Check for tags line
-    if len(lines) > 2 and lines[2].startswith("#"):
-        tags_line = lines[2]
-        tags = tags_line.strip().split()  # Extract tags, including the leading '#'
-        post_body = "\n".join(lines[3:]).strip()  # Post body starts from the fourth line
-    else:
-        post_body = "\n".join(lines[2:]).strip()  # Post body starts from the third line
+    post_date = datetime.strftime(post_time, "%a %b %d %H:%M %Y")
 
     # Convert post body from markdown to HTML
     html_body = md_to_html.convert(post_body)
@@ -159,11 +121,11 @@ def process_post(post_contents: str, config) -> str:
 </body>
 </html>
 """
-    return post_id, html_content, article_html, post_date
+    return html_content, article_html, post_time
 
 
 def sort_by_date(file_list):
-    file_list.sort(key=lambda x: datetime.strptime(x[1][2], "%a %b %d %H:%M:%S %Y"), reverse=True)
+    file_list.sort(key=lambda x: x[1][2], reverse=True)
     return file_list
 
 
@@ -331,11 +293,11 @@ def generate_atom_feed(file_list, config):
 
     # Create entries for each article
     for filename, content in file_list:
-        _, article_content, article_date_str = content
+        article_content, article_date = content[1], content[2]
         article_link = feed_link + "/" + filename
 
-        # Parse the date string into a datetime object
-        article_date = datetime.strptime(article_date_str, "%a %b %d %H:%M:%S %Y")
+        # Parse the date into a string
+        article_date_str = datetime.strftime(article_date, "%a %b %d %H:%M:%S %Y")
 
         # Convert to ISO 8601 format
         article_date_iso = article_date.isoformat() + "Z"
