@@ -1,4 +1,6 @@
 # blog-agent
+**Note:** This repo is meant for my personal use, since it's for a very specific workflow that I like to use.
+
 Publish a blog to S3 automatically using text files in Dropbox.
 
 **Tip:** If you save very frequently while writing text files (like I do), consider pausing Dropbox sync while you write and resuming after you've finished editing. This will avoid frequent republishes and Lambda calls.
