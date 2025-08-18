@@ -20,7 +20,7 @@ DROPBOX_APP_SECRET = os.environ.get("DROPBOX_APP_SECRET", "your-dropbox-app-secr
 DROPBOX_FOLDER_PATH = os.environ.get("DROPBOX_FOLDER_PATH", "/your-journal-folder-in-dropbox/")
 S3_PREFIX = os.environ.get("S3_PREFIX", "public/path/in/s3/")
 
-FILE_PROCESSORS = os.environ.get("FILE_PROCESSORS", "blog,custom_cms").split(",")
+FILE_PROCESSORS = os.environ.get("FILE_PROCESSORS", "blog,hugo").split(",")
 
 if set(FILE_PROCESSORS).difference(VALID_FILE_PROCESSORS):
     raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
