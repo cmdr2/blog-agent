@@ -21,14 +21,6 @@ DROPBOX_FOLDER_PATH = os.environ.get("DROPBOX_FOLDER_PATH", "/your-journal-folde
 S3_PREFIX = os.environ.get("S3_PREFIX", "public/path/in/s3/")
 
 FILE_PROCESSORS = os.environ.get("FILE_PROCESSORS", "blog,custom_cms").split(",")
-BLOG_TITLE = os.environ.get("BLOG_TITLE", "Blog")
-BLOG_URL = os.environ.get("BLOG_URL", "https://your-blog-address.com")
-BLOG_AUTHOR = os.environ.get("BLOG_AUTHOR")
-BLOG_EMAIL = os.environ.get("BLOG_EMAIL")
-SOCIAL_GITHUB_USERNAME = os.environ.get("SOCIAL_GITHUB_USERNAME")
-SOCIAL_X_USERNAME = os.environ.get("SOCIAL_X_USERNAME")
-SOCIAL_DISCORD_USERNAME = os.environ.get("SOCIAL_DISCORD_USERNAME")
-BLOG_POSTS_PER_PAGE = int(os.environ.get("BLOG_POSTS_PER_PAGE", 20))
 
 if set(FILE_PROCESSORS).difference(VALID_FILE_PROCESSORS):
     raise RuntimeError(f"Invalid FILE_PROCESSOR in config! Should be one of: {VALID_FILE_PROCESSORS}")
@@ -57,7 +49,6 @@ def ensure_slashes(path, start=True, end=True):
 
 DROPBOX_FOLDER_PATH = ensure_slashes(DROPBOX_FOLDER_PATH, start=True, end=False)
 S3_PREFIX = ensure_slashes(S3_PREFIX, start=False, end=False)
-BLOG_URL = ensure_slashes(BLOG_URL, start=False, end=False)
 
 s3_client = None
 if "IS_LOCAL_TEST" not in os.environ:
@@ -87,19 +78,6 @@ def lambda_handler(event, context):
         print("Invalid signature")
         return {"statusCode": 404, "body": "Not found"}
 
-    # gather config
-    config = {"blog_title": BLOG_TITLE, "blog_url": BLOG_URL, "blog_posts_per_page": BLOG_POSTS_PER_PAGE}
-    if BLOG_AUTHOR:
-        config["blog_author"] = BLOG_AUTHOR
-    if BLOG_EMAIL:
-        config["blog_email"] = BLOG_EMAIL
-    if SOCIAL_DISCORD_USERNAME:
-        config["social_discord_username"] = SOCIAL_DISCORD_USERNAME
-    if SOCIAL_GITHUB_USERNAME:
-        config["social_github_username"] = SOCIAL_GITHUB_USERNAME
-    if SOCIAL_X_USERNAME:
-        config["social_x_username"] = SOCIAL_X_USERNAME
-
     # Step 1: Get the file index from S3
     # file_index = get_json_file(FILE_INDEX_PATH)
 
@@ -108,7 +86,7 @@ def lambda_handler(event, context):
 
     # Step 3: Extract and copy files to S3
     zip_files_iterator = unzip_files(io.BytesIO(zip_data))
-    file_list = get_file_list(zip_files_iterator, config)
+    file_list = get_file_list(zip_files_iterator)
 
     # Step 4: Set the new file_index
     # file_index_entry = (FILE_INDEX_PATH, json.dumps(file_index))

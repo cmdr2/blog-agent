@@ -9,6 +9,15 @@ from datetime import datetime, timezone
 
 from .markdown_to_html import MarkdownToHtmlConverter
 
+BLOG_TITLE = os.environ.get("BLOG_TITLE", "Blog")
+BLOG_URL = os.environ.get("BLOG_URL", "https://your-blog-address.com")
+BLOG_AUTHOR = os.environ.get("BLOG_AUTHOR")
+BLOG_EMAIL = os.environ.get("BLOG_EMAIL")
+SOCIAL_GITHUB_USERNAME = os.environ.get("SOCIAL_GITHUB_USERNAME")
+SOCIAL_X_USERNAME = os.environ.get("SOCIAL_X_USERNAME")
+SOCIAL_DISCORD_USERNAME = os.environ.get("SOCIAL_DISCORD_USERNAME")
+BLOG_POSTS_PER_PAGE = int(os.environ.get("BLOG_POSTS_PER_PAGE", 20))
+
 HEAD = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,6 +32,8 @@ HEAD = """
 
 
 def process_files(files, config={}):
+    config.update(get_blog_config())
+
     file_list = []
     dir_name = os.path.dirname(__file__)
 
@@ -120,6 +131,24 @@ def process_post(post_time, tags, post_body, config) -> str:
 </html>
 """
     return html_content, article_html, post_time
+
+
+def get_blog_config():
+    blog_url = BLOG_URL[:-1] if BLOG_URL.endswith("/") else BLOG_URL
+
+    config = {"blog_title": BLOG_TITLE, "blog_url": blog_url, "blog_posts_per_page": BLOG_POSTS_PER_PAGE}
+    if BLOG_AUTHOR:
+        config["blog_author"] = BLOG_AUTHOR
+    if BLOG_EMAIL:
+        config["blog_email"] = BLOG_EMAIL
+    if SOCIAL_DISCORD_USERNAME:
+        config["social_discord_username"] = SOCIAL_DISCORD_USERNAME
+    if SOCIAL_GITHUB_USERNAME:
+        config["social_github_username"] = SOCIAL_GITHUB_USERNAME
+    if SOCIAL_X_USERNAME:
+        config["social_x_username"] = SOCIAL_X_USERNAME
+
+    return config
 
 
 def sort_by_date(file_list):
