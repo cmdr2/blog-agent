@@ -10,7 +10,7 @@ from mimetypes import guess_type
 from hashlib import sha256
 import hmac
 
-VALID_FILE_PROCESSORS = ("blog", "custom_cms", "passthrough")
+VALID_FILE_PROCESSORS = ("blog", "custom_cms", "jekyll", "hugo", "passthrough")
 FILE_INDEX_PATH = ".dropbox_index.json"
 
 S3_BUCKET = os.environ.get("S3_BUCKET", "your-s3-bucket-name")

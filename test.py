@@ -1,6 +1,11 @@
 import os
 
-os.environ["IS_LOCAL_TEST"] = "1"
+os.environ.update(
+    {
+        "IS_LOCAL_TEST": "1",
+        "FILE_PROCESSORS": "blog,hugo",
+    }
+)
 
 from blog_agent import get_file_list
 
