@@ -1,20 +1,19 @@
-def process_files(files, config={}):
-    file_list = [process_file(filename, data, config) for filename, data in files]
-
+def run(files, config={}):
+    file_list = [process_file(filename, data) for filename, data in files]
     return file_list
 
 
-def process_file(filename: str, data: tuple, config: dict) -> list:
+def process_file(filename: str, data: tuple) -> list:
     post_time, tags, post_body = data
     post_id = filename.split("/")[-1]
     filepath = post_time.strftime("%Y-%m-%d") + "-" + post_id + ".md"
 
-    jekyll_content = format_jekyll_content(post_id, post_time, tags, post_body, config)
+    jekyll_content = format_jekyll_content(post_id, post_time, tags, post_body)
 
     return filepath, jekyll_content
 
 
-def format_jekyll_content(post_id, post_time, tags, post_body, config):
+def format_jekyll_content(post_id, post_time, tags, post_body):
     # Format the date for Jekyll's YYYY-MM-DD HH:MM:SS +/-TTTT format
     # Jekyll typically uses UTC or a specified timezone. For simplicity, we'll use UTC.
     post_date_jekyll = post_time.strftime("%Y-%m-%d %H:%M:%S %z")

@@ -1,0 +1,3 @@
+[submodule "liteflow"]
+	path = liteflow
+	url = https://github.com/cmdr2/liteflow.git

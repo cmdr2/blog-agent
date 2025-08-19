@@ -3,7 +3,9 @@ import re
 from datetime import datetime
 
 
-def process_files(files, config={}):
+def run(files, config={}):
+    "Returns a list of tuples. Each tuple is (filename, (post_time, tags, post_body))"
+
     new_files = []
 
     for filename, file_contents in files:

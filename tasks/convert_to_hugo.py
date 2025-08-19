@@ -1,19 +1,19 @@
-def process_files(files, config={}):
-    file_list = [process_file(filename, data, config) for filename, data in files]
+def run(files, config={}):
+    file_list = [process_file(filename, data) for filename, data in files]
     return file_list
 
 
-def process_file(filename: str, data: tuple, config: dict) -> list:
+def process_file(filename: str, data: tuple) -> list:
     post_time, tags, post_body = data
     post_id = filename.split("/")[-1]
     filepath = post_time.strftime("%Y-%m-%d") + "-" + post_id + ".md"
 
-    hugo_content = format_hugo_content(post_id, post_time, tags, post_body, config)
+    hugo_content = format_hugo_content(post_id, post_time, tags, post_body)
 
     return filepath, hugo_content
 
 
-def format_hugo_content(post_id, post_time, tags, post_body, config):
+def format_hugo_content(post_id, post_time, tags, post_body):
     # Format the date in ISO 8601 format for Hugo
     post_date_hugo = post_time.isoformat()
 

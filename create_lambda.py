@@ -17,7 +17,17 @@ def zip_lambda_files():
         os.remove(zip_file_name)
 
     # Create a command to zip the files, ignoring __pycache__ directories
-    command = ["zip", "-r", zip_file_name, "blog_agent.py", "file_processors", "-x", "*__pycache__*"]
+    command = [
+        "zip",
+        "-r",
+        zip_file_name,
+        "blog_agent.py",
+        "liteflow.py",
+        "workflow.py",
+        "tasks",
+        "-x",
+        "*__pycache__*",
+    ]
 
     # Execute the command
     subprocess.run(command, check=True)
