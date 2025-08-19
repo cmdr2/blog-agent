@@ -90,7 +90,7 @@ def run(files, config={}):
         f"{api_base}/git/commits",
         token,
         {
-            "message": "Automated commit from Lambda",
+            "message": "Update blog",
             "tree": new_tree_sha,
             "parents": [latest_commit_sha],
         },
