@@ -1,4 +1,5 @@
-import requests
+import http.client
+import json
 import hashlib
 
 
@@ -15,43 +16,32 @@ def run(files, config={}):
             github_repo: str
             github_branch: str
             github_token: str (PAT or GitHub App installation token)
+            github_prefix: optional str, prefix path inside repo
     """
     owner = config["github_owner"]
     repo = config["github_repo"]
     branch = config["github_branch"]
-    prefix = config.get("github_prefix", "")
     token = config["github_token"]
+    prefix = config.get("github_prefix", "")
+    if prefix:
+        prefix = prefix.strip("/")
 
-    api = f"https://api.github.com/repos/{owner}/{repo}"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-    }
+    api_base = f"/repos/{owner}/{repo}"
 
     # 1. Get the latest commit on the branch
-    ref_resp = requests.get(f"{api}/git/ref/heads/{branch}", headers=headers)
-    ref_resp.raise_for_status()
-    ref_data = ref_resp.json()
+    ref_data = _gh_request("GET", f"{api_base}/git/ref/heads/{branch}", token)
     latest_commit_sha = ref_data["object"]["sha"]
 
-    commit_resp = requests.get(f"{api}/git/commits/{latest_commit_sha}", headers=headers)
-    commit_resp.raise_for_status()
-    commit_data = commit_resp.json()
+    commit_data = _gh_request("GET", f"{api_base}/git/commits/{latest_commit_sha}", token)
     base_tree_sha = commit_data["tree"]["sha"]
 
     # 2. Get the full tree of the branch
-    tree_resp = requests.get(f"{api}/git/trees/{base_tree_sha}?recursive=1", headers=headers)
-    tree_resp.raise_for_status()
-    tree_data = tree_resp.json()
+    tree_data = _gh_request("GET", f"{api_base}/git/trees/{base_tree_sha}?recursive=1", token)
     existing_files = {item["path"]: item["sha"] for item in tree_data.get("tree", []) if item["type"] == "blob"}
 
     # 3. Prepare tree entries for changed files only
     tree_entries = []
     changed_files = []
-
-    if prefix:
-        prefix = prefix.strip("/")
 
     for filepath, content in files:
         full_path = f"{prefix}/{filepath}" if prefix else filepath
@@ -64,13 +54,13 @@ def run(files, config={}):
                 continue  # unchanged
 
         # Create new blob
-        blob_resp = requests.post(
-            f"{api}/git/blobs",
-            headers=headers,
-            json={"content": content, "encoding": "utf-8"},
+        blob_resp = _gh_request(
+            "POST",
+            f"{api_base}/git/blobs",
+            token,
+            {"content": content, "encoding": "utf-8"},
         )
-        blob_resp.raise_for_status()
-        blob_sha = blob_resp.json()["sha"]
+        blob_sha = blob_resp["sha"]
 
         tree_entries.append(
             {
@@ -86,36 +76,60 @@ def run(files, config={}):
         return {"committed_files": [], "commit_sha": None}
 
     # 4. Create a new tree
-    new_tree_resp = requests.post(
-        f"{api}/git/trees",
-        headers=headers,
-        json={"base_tree": base_tree_sha, "tree": tree_entries},
+    new_tree_resp = _gh_request(
+        "POST",
+        f"{api_base}/git/trees",
+        token,
+        {"base_tree": base_tree_sha, "tree": tree_entries},
     )
-    new_tree_resp.raise_for_status()
-    new_tree_sha = new_tree_resp.json()["sha"]
+    new_tree_sha = new_tree_resp["sha"]
 
     # 5. Create a new commit
-    new_commit_resp = requests.post(
-        f"{api}/git/commits",
-        headers=headers,
-        json={
+    new_commit_resp = _gh_request(
+        "POST",
+        f"{api_base}/git/commits",
+        token,
+        {
             "message": "Automated commit from Lambda",
             "tree": new_tree_sha,
             "parents": [latest_commit_sha],
         },
     )
-    new_commit_resp.raise_for_status()
-    new_commit_sha = new_commit_resp.json()["sha"]
+    new_commit_sha = new_commit_resp["sha"]
 
     # 6. Update the branch ref
-    update_ref_resp = requests.patch(
-        f"{api}/git/refs/heads/{branch}",
-        headers=headers,
-        json={"sha": new_commit_sha},
+    _gh_request(
+        "PATCH",
+        f"{api_base}/git/refs/heads/{branch}",
+        token,
+        {"sha": new_commit_sha},
     )
-    update_ref_resp.raise_for_status()
 
     return {
         "committed_files": changed_files,
         "commit_sha": new_commit_sha,
     }
+
+
+def _gh_request(method, path, token, body=None):
+    conn = http.client.HTTPSConnection("api.github.com")
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "User-Agent": "publish-to-github-script",
+    }
+    if body is not None:
+        data = json.dumps(body).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    else:
+        data = None
+
+    conn.request(method, path, body=data, headers=headers)
+    resp = conn.getresponse()
+    resp_data = resp.read().decode("utf-8")
+    if resp.status >= 300:
+        raise RuntimeError(f"GitHub API error {resp.status}: {resp_data}")
+    if resp_data:
+        return json.loads(resp_data)
+    return None
