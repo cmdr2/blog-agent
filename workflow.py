@@ -54,7 +54,7 @@ def run():
             (filter_easy_diffusion_posts, convert_to_jekyll, partial(publish_to_github, config=EASY_DIFFUSION_CONFIG)),
             (convert_to_hugo, partial(publish_to_github, config=CMDR2_BLOG_CONFIG)),
         },
-        wait_for_threads,
+        # wait_for_threads,
     ]
 
     _run(workflow)
