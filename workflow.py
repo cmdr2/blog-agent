@@ -18,7 +18,7 @@ EASY_DIFFUSION_CONFIG = {"s3_bucket": "cmdr2.org", "s3_prefix": "easy-diffusion"
 CMDR2_BLOG_CONFIG = {
     "github_owner": "cmdr2",
     "github_repo": "cmdr2.github.io",
-    "github_branch": "foo",
+    "github_branch": "main",
     "github_prefix": "content/posts",
     "github_token": os.environ.get("CMDR2_BLOG_GITHUB_TOKEN"),
 }
