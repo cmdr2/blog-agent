@@ -19,7 +19,7 @@ CMDR2_BLOG_CONFIG = {
     "github_owner": "cmdr2",
     "github_repo": "cmdr2.github.io",
     "github_branch": "foo",
-    "github_prefix": "content",
+    "github_prefix": "content/posts",
     "github_token": os.environ.get("CMDR2_BLOG_GITHUB_TOKEN"),
 }
 
