@@ -47,6 +47,7 @@ def run(files, config={}):
         full_path = f"{prefix}/{filepath}" if prefix else filepath
 
         # Quick check: if file exists and has the same blob sha, skip
+        computed_sha = None
         if full_path in existing_files:
             content_encoded = content.encode("utf-8")
             data = f"blob {len(content_encoded)}\0".encode("utf-8")
