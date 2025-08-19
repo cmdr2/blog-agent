@@ -105,13 +105,8 @@ def run(files, config={}):
         {"sha": new_commit_sha},
     )
 
-    output = {
-        "committed_files": changed_files,
-        "commit_sha": new_commit_sha,
-    }
-
-    print(f"Committed {changed_files} to {owner}/{repo}@{branch}")
-    return output
+    print(f"Committed {changed_files} to {owner}/{repo}@{branch}. Commit SHA: {new_commit_sha}")
+    return []
 
 
 def _gh_request(method, path, token, body=None):
