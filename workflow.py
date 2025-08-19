@@ -51,6 +51,9 @@ def filter_freebird_posts(files):
     new_files = []
     for entry in files:
         tags = entry[1][1]
+        if "#worklog" in tags:
+            continue
+
         if "#freebird" in tags:
             new_files.append(entry)
     return new_files
