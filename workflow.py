@@ -5,7 +5,7 @@ from tasks import (
     unzip_files,
     split_blog_entries,
     convert_to_hugo,
-    convert_to_jekyll,
+    convert_to_mkdocs,
 )
 from tasks.publish_to_github import run as publish_to_github
 from liteflow import run as _run
@@ -19,6 +19,13 @@ EASY_DIFFUSION_CONFIG = {
     "github_branch": "main",
     "github_prefix": "content/blog",
     "github_token": os.environ.get("EASYDIFFUSION_BLOG_GITHUB_TOKEN"),
+}
+FREEBIRD_CONFIG = {
+    "github_owner": "freebirdxr",
+    "github_repo": "freebird-website",
+    "github_branch": "main",
+    "github_prefix": "docs/blog/posts",
+    "github_token": os.environ.get("FREEBIRD_BLOG_GITHUB_TOKEN"),
 }
 CMDR2_BLOG_CONFIG = {
     "github_owner": "cmdr2",
@@ -39,6 +46,16 @@ def filter_easy_diffusion_posts(files):
     return new_files
 
 
+def filter_freebird_posts(files):
+    # files is a list of tuples: (filename, (post_time, tags, post_body))
+    new_files = []
+    for entry in files:
+        tags = entry[1][1]
+        if "#freebird" in tags:
+            new_files.append(entry)
+    return new_files
+
+
 def wait_for_threads(thread_groups):
     for thread_group in thread_groups:
         for thread in thread_group:
@@ -51,8 +68,9 @@ def run():
         unzip_files,
         split_blog_entries,
         {
-            (filter_easy_diffusion_posts, convert_to_jekyll, partial(publish_to_github, config=EASY_DIFFUSION_CONFIG)),
             (convert_to_hugo, partial(publish_to_github, config=CMDR2_BLOG_CONFIG)),
+            (filter_easy_diffusion_posts, convert_to_hugo, partial(publish_to_github, config=EASY_DIFFUSION_CONFIG)),
+            (filter_freebird_posts, convert_to_mkdocs, partial(publish_to_github, config=FREEBIRD_CONFIG)),
         },
         # wait_for_threads,
     ]
