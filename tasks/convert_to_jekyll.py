@@ -34,7 +34,7 @@ def format_jekyll_content(post_id, post_time, tags, post_body, title):
 layout: post
 title: "{title}"
 date: {post_date_jekyll}
-slug: {post_id}
+slug: "{post_id}"
 {tags_yaml}---
 
 """

@@ -30,7 +30,7 @@ def format_hugo_content(post_id, post_time, tags, post_body, title):
     front_matter = f"""---
 title: "{title}"
 date: {post_date_hugo}
-slug: {post_id}
+slug: "{post_id}"
 {tags_yaml}---
 """
 

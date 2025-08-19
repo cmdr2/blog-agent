@@ -74,7 +74,11 @@ def process_post(post_contents: str, config) -> str:
             title = line[len("Title: ") :].strip()
             idx += 1
             continue
-        # First non-tag/title line is the start of the body
+        if line.startswith("Slug: "):
+            post_id = line[len("Slug: ") :].strip()
+            idx += 1
+            continue
+        # First non-tag/title/slug line is the start of the body
         break
 
     # Remaining lines are the post body
