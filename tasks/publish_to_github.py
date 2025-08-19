@@ -48,7 +48,9 @@ def run(files, config={}):
 
         # Quick check: if file exists and has the same blob sha, skip
         if full_path in existing_files:
-            data = f"blob {len(content)}\0{content}".encode("utf-8")
+            content_encoded = content.encode("utf-8")
+            data = f"blob {len(content_encoded)}\0".encode("utf-8")
+            data += content_encoded
             computed_sha = hashlib.sha1(data).hexdigest()
             if computed_sha == existing_files[full_path]:
                 continue  # unchanged
