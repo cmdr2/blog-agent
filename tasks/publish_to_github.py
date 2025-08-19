@@ -53,6 +53,8 @@ def run(files, config={}):
             if computed_sha == existing_files[full_path]:
                 continue  # unchanged
 
+        print(f"File changed: {full_path}. Old SHA: {existing_files.get(full_path, 'None')}, New SHA: {computed_sha}")
+
         # Create new blob
         blob_resp = _gh_request(
             "POST",
@@ -73,7 +75,8 @@ def run(files, config={}):
         changed_files.append(full_path)
 
     if not tree_entries:
-        return {"committed_files": [], "commit_sha": None}
+        print("No files changed, nothing to commit.")
+        return []
 
     # 4. Create a new tree
     new_tree_resp = _gh_request(
