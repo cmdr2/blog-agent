@@ -80,4 +80,7 @@ def process_post(post_contents: str, config) -> str:
     # Remaining lines are the post body
     post_body = "\n".join(lines[idx:]).strip()
 
+    if title:
+        post_body = f"# {title}\n\n{post_body}"
+
     return post_id, post_time, tags, post_body, title
