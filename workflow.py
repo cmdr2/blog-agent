@@ -6,7 +6,7 @@ from tasks import (
     convert_to_jekyll,
     upload_to_s3 as publish_to_github,
 )
-from liteflow.liteflow import run as liteflow_run
+from liteflow import run as _run
 
 
 from functools import partial
@@ -44,4 +44,4 @@ workflow = [
 
 
 def run():
-    liteflow_run(workflow)
+    _run(workflow)
