@@ -1,13 +1,8 @@
 import os
 
-os.environ.update(
-    {
-        "IS_LOCAL_TEST": "1",
-        "FILE_PROCESSORS": "blog,hugo",
-    }
-)
+os.environ.update({"IS_LOCAL_TEST": "1"})
 
-from blog_agent import get_file_list
+import workflow
 
 base_dir = "~/Dropbox/Apps/journal-public/"
 base_dir = os.path.expanduser(base_dir)
@@ -22,26 +17,19 @@ for file in files:
     with open(base_dir + "/" + file, "rb") as f:
         files_iterator.append((file, f.read()))
 
-config = {
-    "blog_title": "cmdr2's notes",
-    "blog_url": "https://cmdr2.org",
-    "blog_author": "cmdr2",
-    "blog_email": "dev@cmdr2.org",
-    "social_github_username": "cmdr2",
-    "social_discord_username": "cmdr2",
-    "social_x_username": "cmdr2",
-    "blog_posts_per_page": 10,
-}
+workflow.download_from_dropbox = lambda x: files_iterator
+workflow.unzip_files = lambda x: x  # No-op since files are already in the correct format
+workflow.publish_to_github = lambda x, config: print("uploading", config, len(x)) or []  # No-op for local testing
 
-d = get_file_list(files_iterator, config)
+workflow.run()
 
-for file_path, content in d:
-    out_path = f"tmp/{file_path}"
+# for file_path, content in d:
+#     out_path = f"tmp/{file_path}"
 
-    dir_name = os.path.dirname(out_path)
-    if dir_name:
-        os.makedirs(dir_name, exist_ok=True)
+#     dir_name = os.path.dirname(out_path)
+#     if dir_name:
+#         os.makedirs(dir_name, exist_ok=True)
 
-    with open(out_path, "w") as f2:
-        print(out_path, len(content), "bytes")
-        f2.write(content)
+#     with open(out_path, "w") as f2:
+#         print(out_path, len(content), "bytes")
+#         f2.write(content)

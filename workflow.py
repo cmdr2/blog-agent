@@ -4,8 +4,8 @@ from tasks import (
     split_blog_entries,
     convert_to_hugo,
     convert_to_jekyll,
-    upload_to_s3 as publish_to_github,
 )
+from tasks.upload_to_s3 import run as publish_to_github
 from liteflow import run as _run
 
 
@@ -20,7 +20,7 @@ def filter_easy_diffusion_posts(files):
     new_files = []
     for entry in files:
         tags = entry[1][1]
-        if "easydiffusion" in tags:
+        if "#easydiffusion" in tags:
             new_files.append(entry)
     return new_files
 
@@ -31,17 +31,16 @@ def wait_for_threads(thread_groups):
             thread.join()
 
 
-workflow = [
-    download_from_dropbox,
-    unzip_files,
-    split_blog_entries,
-    {
-        [filter_easy_diffusion_posts, convert_to_jekyll, partial(publish_to_github, config=EASY_DIFFUSION_CONFIG)],
-        [convert_to_hugo, partial(publish_to_github, config=CMDR2_BLOG_CONFIG)],
-    },
-    wait_for_threads,
-]
-
-
 def run():
+    workflow = [
+        download_from_dropbox,
+        unzip_files,
+        split_blog_entries,
+        {
+            (filter_easy_diffusion_posts, convert_to_jekyll, partial(publish_to_github, config=EASY_DIFFUSION_CONFIG)),
+            (convert_to_hugo, partial(publish_to_github, config=CMDR2_BLOG_CONFIG)),
+        },
+        wait_for_threads,
+    ]
+
     _run(workflow)
