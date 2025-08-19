@@ -29,9 +29,6 @@ def filter_easy_diffusion_posts(files):
     new_files = []
     for entry in files:
         tags = entry[1][1]
-        if "#worklog" in tags:
-            continue
-
         if "#easydiffusion" in tags or "#sdkit" in tags:
             new_files.append(entry)
     return new_files
