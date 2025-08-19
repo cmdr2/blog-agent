@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 def run(files, config={}):
-    "Returns a list of tuples. Each tuple is (filename, (post_time, tags, post_body))"
+    "Returns a list of tuples. Each tuple is (filename, (post_time, tags, post_body, title))"
 
     new_files = []
 
@@ -54,12 +54,30 @@ def process_post(post_contents: str, config) -> str:
     post_time = datetime.strptime(post_date, "%a %b %d %H:%M:%S %Y")
     post_id = int(post_time.timestamp())
 
-    # Check for tags line
-    if len(lines) > 2 and lines[2].startswith("#"):
-        tags_line = lines[2]
-        tags = tags_line.strip().split()  # Extract tags, including the leading '#'
-        post_body = "\n".join(lines[3:]).strip()  # Post body starts from the fourth line
-    else:
-        post_body = "\n".join(lines[2:]).strip()  # Post body starts from the third line
+    # Initialize variables
+    tags = []
+    title = None
 
-    return post_id, post_time, tags, post_body
+    # Parse lines for tags and title
+    idx = 1
+    while idx < len(lines):
+        line = lines[idx].strip()
+        if not line:
+            idx += 1
+            continue
+        # Only accept lines that start with '#' immediately followed by non-space text
+        if re.match(r"^#\S+", line):
+            tags += [tag for tag in line.split()]
+            idx += 1
+            continue
+        if line.startswith("Title: "):
+            title = line[len("Title: ") :].strip()
+            idx += 1
+            continue
+        # First non-tag/title line is the start of the body
+        break
+
+    # Remaining lines are the post body
+    post_body = "\n".join(lines[idx:]).strip()
+
+    return post_id, post_time, tags, post_body, title

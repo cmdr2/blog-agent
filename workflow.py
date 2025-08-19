@@ -37,7 +37,7 @@ CMDR2_BLOG_CONFIG = {
 
 
 def filter_easy_diffusion_posts(files):
-    # files is a list of tuples: (filename, (post_time, tags, post_body))
+    # files is a list of tuples: (filename, (post_time, tags, post_body, title))
     new_files = []
     for entry in files:
         tags = entry[1][1]
@@ -47,7 +47,7 @@ def filter_easy_diffusion_posts(files):
 
 
 def filter_freebird_posts(files):
-    # files is a list of tuples: (filename, (post_time, tags, post_body))
+    # files is a list of tuples: (filename, (post_time, tags, post_body, title))
     new_files = []
     for entry in files:
         tags = entry[1][1]

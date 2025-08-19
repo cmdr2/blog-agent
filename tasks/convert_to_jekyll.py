@@ -4,16 +4,16 @@ def run(files, config={}):
 
 
 def process_file(filename: str, data: tuple) -> list:
-    post_time, tags, post_body = data
+    post_time, tags, post_body, title = data
     post_id = filename.split("/")[-1]
     filepath = post_time.strftime("%Y-%m-%d") + "-" + post_id + ".md"
 
-    jekyll_content = format_jekyll_content(post_id, post_time, tags, post_body)
+    jekyll_content = format_jekyll_content(post_id, post_time, tags, post_body, title)
 
     return filepath, jekyll_content
 
 
-def format_jekyll_content(post_id, post_time, tags, post_body):
+def format_jekyll_content(post_id, post_time, tags, post_body, title):
     # Format the date for Jekyll's YYYY-MM-DD HH:MM:SS +/-TTTT format
     # Jekyll typically uses UTC or a specified timezone. For simplicity, we'll use UTC.
     post_date_jekyll = post_time.strftime("%Y-%m-%d %H:%M:%S %z")
@@ -27,10 +27,12 @@ def format_jekyll_content(post_id, post_time, tags, post_body):
         formatted_tags = [tag[1:] for tag in tags]
         tags_yaml = f"tags: [{', '.join(formatted_tags)}]\n"
 
+    title = title or f"Post from {post_time.strftime('%b %d, %Y')}"
+
     # Construct the Jekyll front matter
     front_matter = f"""---
 layout: post
-title: "Post from {post_time.strftime('%b %d, %Y')}"
+title: "{title}"
 date: {post_date_jekyll}
 slug: {post_id}
 {tags_yaml}---

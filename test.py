@@ -19,7 +19,9 @@ for file in files:
 
 workflow.download_from_dropbox = lambda x: files_iterator
 workflow.unzip_files = lambda x: x  # No-op since files are already in the correct format
-workflow.publish_to_github = lambda x, config: print("uploading", config, len(x)) or []  # No-op for local testing
+workflow.publish_to_github = (
+    lambda x, config: print("uploading", [e[1][:100] for e in x]) or []
+)  # No-op for local testing
 
 workflow.run()
 
