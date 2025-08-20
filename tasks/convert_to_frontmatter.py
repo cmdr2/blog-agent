@@ -1,41 +1,39 @@
 def run(files, **kwargs):
     cms = kwargs.get("cms", "hugo")
-    file_list = [process_file(filename, data, cms) for filename, data in files]
+    file_list = [process_file(filename, post, cms) for filename, post in files]
     return file_list
 
 
-def process_file(filename: str, data: tuple, cms) -> list:
-    post_time, tags, post_body, title = data
-    post_id = filename.split("/")[-1]
-    filepath = post_time.strftime("%Y-%m-%d") + "-" + post_id + ".md"
+def process_file(filename: str, post, cms) -> list:
+    filepath = post.time.strftime("%Y-%m-%d") + "-" + post.id + ".md"
 
-    content = format_content(post_id, post_time, tags, post_body, title, cms)
+    content = format_content(post, cms)
 
     return filepath, content
 
 
-def format_content(post_id, post_time, tags, post_body, title, cms):
+def format_content(post, cms):
     if cms == "hugo":
-        tag_label, post_date = get_hugo_frontmatter(post_time)
+        tag_label, post_date = get_hugo_frontmatter(post.time)
     elif cms == "jekyll":
-        tag_label, post_date = get_jekyll_frontmatter(post_time)
+        tag_label, post_date = get_jekyll_frontmatter(post.time)
     elif cms == "mkdocs":
-        tag_label, post_date = get_mkdocs_frontmatter(post_time)
+        tag_label, post_date = get_mkdocs_frontmatter(post.time)
     else:
         raise ValueError(f"Unsupported CMS: {cms}")
 
-    title = title or f"Post from {post_time.strftime('%b %d, %Y')}"
+    title = post.title or f"Post from {post.time.strftime('%b %d, %Y')}"
 
     front_matter = [
         f'title: "{title}"',
         f"date: {post_date}",
-        f'slug: "{post_id}"',
+        f'slug: "{post.id}"',
     ]
 
     # Format tags for YAML front matter
-    if tags:
+    if post.tags:
         # Remove leading '#' from tags
-        formatted_tags = [tag[1:] for tag in tags]
+        formatted_tags = [tag[1:] for tag in post.tags]
         tags_yaml = f"{tag_label}:\n" + "\n".join([f"  - {tag}" for tag in formatted_tags])
         front_matter.append(tags_yaml)
 
@@ -47,7 +45,7 @@ def format_content(post_id, post_time, tags, post_body, title, cms):
     front_matter = "---\n" + front_matter + "\n---\n"
 
     # Combine front matter and post body
-    content = front_matter + "\n" + post_body
+    content = front_matter + "\n" + post.body
 
     return content
 

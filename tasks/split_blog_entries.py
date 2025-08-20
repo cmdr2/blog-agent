@@ -1,10 +1,20 @@
 import os
 import re
 from datetime import datetime
+from dataclasses import dataclass
+
+
+@dataclass
+class Post:
+    id: str
+    time: datetime
+    tags: list
+    body: str
+    title: str = None
 
 
 def run(files, **kwargs):
-    "Returns a list of tuples. Each tuple is (filename, (post_time, tags, post_body, title))"
+    "Returns a list of tuples. Each tuple is (filename, Post)"
 
     new_files = []
 
@@ -36,14 +46,14 @@ def process_file(filename: str, file_contents: bytes) -> list:
     for i, post in enumerate(posts):
         post = post.strip()
         if post:
-            post_id, *data = process_post(post)
-            key = f"{dir_path}/{year}/{month_int}/{post_id}"
+            data = process_post(post)
+            key = f"{dir_path}/{year}/{month_int}/{data.id}"
             post_list.append((key, data))
 
     return post_list
 
 
-def process_post(post_contents: str) -> str:
+def process_post(post_contents: str) -> Post:
     # Split post contents into lines
     lines = post_contents.strip().splitlines()
 
@@ -52,7 +62,7 @@ def process_post(post_contents: str) -> str:
     tags = []
 
     post_time = datetime.strptime(post_date, "%a %b %d %H:%M:%S %Y")
-    post_id = int(post_time.timestamp())
+    post_id = str(int(post_time.timestamp()))
 
     # Initialize variables
     tags = []
@@ -87,4 +97,4 @@ def process_post(post_contents: str) -> str:
     if title:
         post_body = f"# {title}\n\n{post_body}"
 
-    return post_id, post_time, tags, post_body, title
+    return Post(post_id, post_time, tags, post_body, title)
