@@ -60,7 +60,7 @@ def insert_project_crosspost_links_in_cmdr2_blog(files):
 
         if post.project == "easydiffusion":
             new_post_body = (
-                f"Cross-posted from [Easy Diffusion's blog](https://easydiffusion.github.io/blog/{post.id}).\n\n"
+                f"// Cross-posted from [Easy Diffusion's blog](https://easydiffusion.github.io/blog/{post.id}).\n\n"
                 + post.body
             )
             new_post = replace(post, body=new_post_body)
@@ -68,7 +68,7 @@ def insert_project_crosspost_links_in_cmdr2_blog(files):
         elif post.project == "freebird":
             post_uri = post.time.strftime("%Y/%m/%d") + "/" + post.id
             new_post_body = (
-                f"Cross-posted from [Freebird's blog](https://freebirdxr.com/blog/{post_uri}).\n\n" + post.body
+                f"// Cross-posted from [Freebird's blog](https://freebirdxr.com/blog/{post_uri}).\n\n" + post.body
             )
             new_post = replace(post, body=new_post_body)
             new_files.append((filename, new_post))
