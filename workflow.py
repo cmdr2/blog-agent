@@ -4,9 +4,8 @@ from tasks import (
     download_from_dropbox,
     unzip_files,
     split_blog_entries,
-    convert_to_hugo,
-    convert_to_mkdocs,
 )
+from tasks.convert_to_frontmatter import run as convert_to_frontmatter
 from tasks.publish_to_github import run as publish_to_github
 from liteflow import run as _run
 
@@ -70,10 +69,21 @@ def run():
         download_from_dropbox,
         unzip_files,
         split_blog_entries,
-        {
-            (convert_to_hugo, partial(publish_to_github, config=CMDR2_BLOG_CONFIG)),
-            (filter_easy_diffusion_posts, convert_to_hugo, partial(publish_to_github, config=EASY_DIFFUSION_CONFIG)),
-            (filter_freebird_posts, convert_to_mkdocs, partial(publish_to_github, config=FREEBIRD_CONFIG)),
+        {  # feed the blog entries to the three publish pipelines in parallel
+            (
+                partial(convert_to_frontmatter, config={"cms": "hugo"}),
+                partial(publish_to_github, config=CMDR2_BLOG_CONFIG),
+            ),
+            (
+                filter_easy_diffusion_posts,
+                partial(convert_to_frontmatter, config={"cms": "hugo"}),
+                partial(publish_to_github, config=EASY_DIFFUSION_CONFIG),
+            ),
+            (
+                filter_freebird_posts,
+                partial(convert_to_frontmatter, config={"cms": "mkdocs"}),
+                partial(publish_to_github, config=FREEBIRD_CONFIG),
+            ),
         },
         # wait_for_threads,
     ]
