@@ -20,6 +20,8 @@ def update_lambda_function(function_name):
                 function_name,
                 "--zip-file",
                 f"fileb://{zip_file_name}",
+                "--query",
+                "LastUpdateStatus",
             ],
             check=True,
         )
