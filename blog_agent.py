@@ -27,6 +27,7 @@ def lambda_handler(event, context):
         return {"statusCode": 404, "body": "Not found"}
 
     # Run the workflow
+    print("Running workflow...")
     workflow.run()
 
     return {"statusCode": 200, "body": "Publish successful!"}
