@@ -3,18 +3,18 @@ import re
 from datetime import datetime
 
 
-def run(files, config={}):
+def run(files, **kwargs):
     "Returns a list of tuples. Each tuple is (filename, (post_time, tags, post_body, title))"
 
     new_files = []
 
     for filename, file_contents in files:
-        new_files += process_file(filename, file_contents, config)
+        new_files += process_file(filename, file_contents)
 
     return new_files
 
 
-def process_file(filename: str, file_contents: bytes, config: dict) -> list:
+def process_file(filename: str, file_contents: bytes) -> list:
     dir_path = os.path.dirname(filename)
     name = os.path.basename(filename)
     name, ext = os.path.splitext(name)
@@ -36,14 +36,14 @@ def process_file(filename: str, file_contents: bytes, config: dict) -> list:
     for i, post in enumerate(posts):
         post = post.strip()
         if post:
-            post_id, *data = process_post(post, config)
+            post_id, *data = process_post(post)
             key = f"{dir_path}/{year}/{month_int}/{post_id}"
             post_list.append((key, data))
 
     return post_list
 
 
-def process_post(post_contents: str, config) -> str:
+def process_post(post_contents: str) -> str:
     # Split post contents into lines
     lines = post_contents.strip().splitlines()
 

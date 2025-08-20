@@ -15,44 +15,44 @@ if "IS_LOCAL_TEST" not in os.environ:
     s3_client = boto3.client("s3")
 
 
-def run(files, config={}):
+def run(files, bucket, prefix="", **kwargs):
     """
     Uploads all files to S3 in a batch operation using threading for concurrent uploads.
     - files: A list of tuples - (file path, file contents)
     """
 
-    config["s3_bucket"] = config.get("s3_bucket") or S3_BUCKET
-    config["s3_prefix"] = config.get("s3_prefix") or S3_PREFIX
+    bucket = bucket or S3_BUCKET
+    prefix = prefix or S3_PREFIX
 
-    if not config["s3_bucket"]:
+    if not bucket:
         print("Error: No S3 bucket configured!")
         return
 
     threads = []
 
     for path, content in files:
-        t = threading.Thread(target=upload_file, args=(path, content, config))
+        t = threading.Thread(target=upload_file, args=(path, content, bucket, prefix))
         t.start()
         threads.append(t)
 
-    if config.get("wait_for_uploads", False):
+    if kwargs.get("wait_for_uploads", False):
         for t in threads:
             t.join()
 
     return threads
 
 
-def upload_file(file_path, file_content, config):
+def upload_file(file_path, file_content, bucket, prefix):
     """
     Upload a single file to S3.
     """
     mime_type = guess_type(file_path)[0]
 
-    key = config["s3_prefix"] + "/" + file_path if config["s3_prefix"] else file_path
+    key = prefix + "/" + file_path if prefix else file_path
 
     print("uploading", key, mime_type)
     s3_client.put_object(
-        Bucket=config["s3_bucket"],
+        Bucket=bucket,
         Key=key,
         Body=file_content.encode(),
         ContentType=mime_type,

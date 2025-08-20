@@ -9,7 +9,7 @@ DROPBOX_APP_SECRET = os.environ.get("DROPBOX_APP_SECRET", "your-dropbox-app-secr
 DROPBOX_FOLDER_PATH = os.environ.get("DROPBOX_FOLDER_PATH", "/your-journal-folder-in-dropbox/")
 
 
-def run(data, config={}):
+def run(data, **kwargs):
     # Step 1: Refresh the access token using the refresh token
     new_access_token = refresh_access_token()
 

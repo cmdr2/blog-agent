@@ -3,7 +3,7 @@ import json
 import hashlib
 
 
-def run(files, config={}):
+def run(files, owner, repo, branch, token, **kwargs):
     """
     Commit only changed files to a GitHub repo branch using the Git Data API.
 
@@ -11,18 +11,13 @@ def run(files, config={}):
         files: list of tuples (filepath, file_contents)
             filepath: str - path inside the repo (e.g. "posts/new.md")
             file_contents: str - file contents as text (UTF-8)
-        config: dict with keys:
-            github_owner: str
-            github_repo: str
-            github_branch: str
-            github_token: str (PAT or GitHub App installation token)
-            github_prefix: optional str, prefix path inside repo
+        owner: str
+        repo: str
+        branch: str
+        token: str (PAT or GitHub App installation token)
+        prefix: optional str, prefix path inside repo
     """
-    owner = config["github_owner"]
-    repo = config["github_repo"]
-    branch = config["github_branch"]
-    token = config["github_token"]
-    prefix = config.get("github_prefix", "")
+    prefix = kwargs.get("prefix", "")
     if prefix:
         prefix = prefix.strip("/")
 

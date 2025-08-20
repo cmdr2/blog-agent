@@ -1,5 +1,5 @@
-def run(files, config={}):
-    cms = config.get("cms", "hugo")
+def run(files, **kwargs):
+    cms = kwargs.get("cms", "hugo")
     file_list = [process_file(filename, data, cms) for filename, data in files]
     return file_list
 
@@ -36,7 +36,7 @@ def format_content(post_id, post_time, tags, post_body, title, cms):
     if tags:
         # Remove leading '#' from tags
         formatted_tags = [tag[1:] for tag in tags]
-        tags_yaml = f"{tag_label}:\n" + "\n".join([f"  - {tag}" for tag in formatted_tags]) + "\n"
+        tags_yaml = f"{tag_label}:\n" + "\n".join([f"  - {tag}" for tag in formatted_tags])
         front_matter.append(tags_yaml)
 
     if cms == "jekyll":
@@ -47,7 +47,7 @@ def format_content(post_id, post_time, tags, post_body, title, cms):
     front_matter = "---\n" + front_matter + "\n---\n"
 
     # Combine front matter and post body
-    content = front_matter + post_body
+    content = front_matter + "\n" + post_body
 
     return content
 

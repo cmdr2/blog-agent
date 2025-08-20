@@ -1,7 +1,7 @@
 import zipfile
 
 
-def run(data, config={}):
+def run(data, **kwargs):
     unzipped_files = []  # tuple of (filename, contents)
 
     with zipfile.ZipFile(data, "r") as zip_ref:
