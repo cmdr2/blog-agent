@@ -17,11 +17,23 @@ for file in files:
     with open(base_dir + "/" + file, "rb") as f:
         files_iterator.append((file, f.read()))
 
+
+def save_files(files, owner, repo, **kwargs):
+    for file_path, content in files:
+        out_path = f"tmp/{repo}/{file_path}"
+
+        dir_name = os.path.dirname(out_path)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
+
+        with open(out_path, "w") as f:
+            print(out_path, len(content), "bytes")
+            f.write(content)
+
+
 workflow.download_from_dropbox = lambda x: files_iterator
 workflow.unzip_files = lambda x: x  # No-op since files are already in the correct format
-workflow.publish_to_github = (
-    lambda x, config: print("uploading", [e[1][:100] for e in x]) or []
-)  # No-op for local testing
+workflow.publish_to_github = save_files
 
 workflow.run()
 
