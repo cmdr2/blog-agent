@@ -70,12 +70,12 @@ def process_post(post_contents: str) -> str:
             tags += [tag for tag in line.split()]
             idx += 1
             continue
-        if line.startswith("Title: "):
-            title = line[len("Title: ") :].strip()
+        if line.lower().startswith("title: "):
+            title = line[len("title: ") :].strip()
             idx += 1
             continue
-        if line.startswith("Slug: "):
-            post_id = line[len("Slug: ") :].strip()
+        if line.lower().startswith("slug: "):
+            post_id = line[len("slug: ") :].strip()
             idx += 1
             continue
         # First non-tag/title/slug line is the start of the body
