@@ -1,0 +1,27 @@
+name: CI Pipeline
+run-name: CI Pipeline
+on:
+  push:
+    branches:
+    - main
+jobs:
+  deploy_to_aws_lambda:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ vars.LAMBDA_DEPLOY_ROLE }}
+        aws-region: us-east-1
+    - name: Create Zip Archive
+      run: |-
+        zip -r function.zip blog_agent.py liteflow.py workflow.py tasks -x "*__pycache__*"
+    - name: Deploy to Lambda
+      run: |-
+        aws lambda update-function-code --function-name 'blog-agent' --zip-file 'fileb://function.zip' --query LastUpdateStatus
+    permissions:
+      contents: read
+      id-token: write
+    if: github.ref == 'refs/heads/main'
