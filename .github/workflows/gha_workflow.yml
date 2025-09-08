@@ -1,3 +1,5 @@
+# Generated initially using github-actions-wizard (https://github.com/cmdr2/github-actions-wizard)
+
 name: CI Pipeline
 run-name: CI Pipeline
 on:
