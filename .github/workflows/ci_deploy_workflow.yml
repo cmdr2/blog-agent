@@ -22,7 +22,7 @@ jobs:
       with:
         name: build
         path: build.zip
-  deploy_to_aws_lambda:
+  deploy_to_aws_lambda_on_main_branch:
     runs-on: ubuntu-latest
     permissions:
       contents: read
