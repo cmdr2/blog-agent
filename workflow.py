@@ -12,11 +12,15 @@ from liteflow import run as _run
 from functools import partial
 from dataclasses import replace
 
+# Easy Diffusion's site is built with Zensical (Material for MkDocs), so its
+# posts use the "zensical" front matter format and live under docs/blog/posts/.
 EASY_DIFFUSION_GH_CONFIG = {
     "owner": "easydiffusion",
     "repo": "easydiffusion.github.io",
     "branch": "main",
-    "prefix": "content/blog",
+    # The site is built with Zensical; posts live under docs/blog/posts/ and use
+    # Material's blog front matter (see convert_to_frontmatter's "zensical" CMS).
+    "prefix": "docs/blog/posts",
     "token": os.environ.get("EASYDIFFUSION_BLOG_GITHUB_TOKEN"),
 }
 FREEBIRD_GH_CONFIG = {
@@ -98,7 +102,7 @@ def run():
             ),
             (
                 filter_easy_diffusion_posts,
-                partial(convert_to_frontmatter, cms="hugo"),
+                partial(convert_to_frontmatter, cms="zensical"),
                 partial(publish_to_github, **EASY_DIFFUSION_GH_CONFIG),
             ),
             (

@@ -86,3 +86,19 @@ After that, any text files that you create inside that folder will be published 
 * `SOCIAL_GITHUB_USERNAME` (optional) - Github username of the blog author.
 * `SOCIAL_X_USERNAME` (optional) - X (twitter) username of the blog author.
 * `SOCIAL_DISCORD_USERNAME` (optional) - Discord username of the blog author.
+
+## Publishing pipelines
+
+`workflow.py` publishes each post to three sites, using the directory and front
+matter format that each site expects:
+
+| Site | Target path | CMS format | Front matter |
+| --- | --- | --- | --- |
+| `cmdr2.github.io` | `content/posts` | `hugo` | `tags`, ISO date |
+| `easydiffusion.github.io` | `docs/blog/posts` | `zensical` | `categories`, ISO date, `<!-- more -->` excerpt marker after the first paragraph |
+| `freebird-website` | `docs/blog/posts` | `mkdocs` | `categories`, date only |
+
+Easy Diffusion's site is built with [Zensical](https://zensical.org) (Material for
+MkDocs), so its posts use Material's `categories` front matter and the
+`<!-- more -->` marker that the blog list uses to show an excerpt. The file name
+(`YYYY-MM-DD-<slug>.md`) and the `slug` field are unchanged.
